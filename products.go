@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"main/internal/database"
 	"net/http"
@@ -17,6 +18,13 @@ type Product struct {
 	ReorderLevel int32 `json:"reorder_level"`
 	ProductName  string `json:"name"`
 }
+
+type Purchase struct {
+	ID string `json:"id`
+	ProductID string `json:"productId`
+	QuantityAdded int32 `json:"quantity"`
+}
+
 func (db * Server)CreateProduct(writer http.ResponseWriter, req *http.Request) {
     var product Product
 
@@ -85,5 +93,81 @@ func (db *Server) GetProduct(w http.ResponseWriter, r *http.Request) {
 		ProcessingError(w, http.StatusNotFound, err)
 		return
 	}
-	respondWithJSON(w, 200, data)
+	respondWithJSON(w, http.StatusOK, data)
+}
+
+
+func (db *Server)NewBulkPurchase(w http.ResponseWriter, r *http.Request) {
+	var purchases []Purchase
+	err := json.NewDecoder(r.Body).Decode(&purchases)
+	if err != nil{
+		log.Println(err)
+		ProcessingError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	for _, purchase := range purchases {
+		err = db.queries.CreatePurchase(r.Context(),
+			database.CreatePurchaseParams{ProductID: purchase.ProductID,
+			QuantityAdded: purchase.QuantityAdded})
+		if err != nil{
+			log.Println(err)
+			ProcessingError(w, http.StatusBadRequest, err)
+			return
+		}
+		if db.Inventory(&purchase, w, r) != nil {
+			err = db.queries.DeleteProduct(r.Context(), purchase.ID)
+			ProcessingError(w, http.StatusBadRequest, fmt.Errorf("Could not delete product after failed update of inventory; Delete manualy"))
+			return
+		}
+	}
+	
+	respondWithJSON(w, http.StatusCreated, map[string]string{
+		"status": "purchase inserted",
+	})	
+}
+
+func (db *Server)NewPurchase(w http.ResponseWriter, r *http.Request) {
+	var purchase Purchase
+	err := json.NewDecoder(r.Body).Decode(&purchase)
+	if err != nil{
+		log.Println(err)
+		ProcessingError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	err = db.queries.CreatePurchase(r.Context(),
+			database.CreatePurchaseParams{ProductID: purchase.ProductID,
+			QuantityAdded: purchase.QuantityAdded})
+		if err != nil{
+			log.Println(err)
+			ProcessingError(w, http.StatusBadRequest, err)
+			return
+		}
+		if db.Inventory(&purchase, w, r) != nil {
+			err = db.queries.DeleteProduct(r.Context(), purchase.ID)
+			ProcessingError(w, http.StatusBadRequest, fmt.Errorf("Could not delete product after failed update of inventory; Delete manualy"))
+			return
+		}
+	
+	respondWithJSON(w, http.StatusCreated, map[string]string{
+		"status": "purchase inserted",
+	})	
+}
+
+
+func (db *Server)Inventory(purchase *Purchase, w http.ResponseWriter, req *http.Request) error {
+	id := purchase.ProductID
+	quantityAdded := purchase.QuantityAdded
+	data, err := db.queries.GetInventory(req.Context(), id)
+	if err != nil {
+		newErr := db.queries.NewInventory(req.Context(), database.NewInventoryParams{ProductID: id, QuantityOnHand: quantityAdded})
+		if newErr != nil {
+			ProcessingError(w, http.StatusBadRequest, newErr)
+			return newErr
+		}
+	}
+	return db.queries.UpdatedInventory(req.Context(), database.UpdatedInventoryParams{ProductID: id, 
+		QuantityOnHand: quantityAdded + data.QuantityOnHand})
+
 }

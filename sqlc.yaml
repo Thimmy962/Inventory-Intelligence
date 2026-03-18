@@ -5,11 +5,8 @@ sql:
     engine: "postgresql"
     gen:
       go:
-<<<<<<< HEAD
-        out: "internal/database"
-=======
         out: "internal/database"
         overrides:
           - db_type: "pg_catalog.numeric"
             go_type: "float64"
->>>>>>> 43fd46e (Worked on products)
+

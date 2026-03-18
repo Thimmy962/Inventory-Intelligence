@@ -5,14 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"main/internal/database"
 	"net/http"
 )
 
 // called on bad request
 func ProcessingError(w http.ResponseWriter, code int, Err error) {
-	w.Header().Set("Content-Type", "Apllication/json")
+	w.Header().Set("Content-Type", "apllication/json")
 	w.WriteHeader(code)
-	w.Write([]byte(Err.Error()))
+	response := map[string]string{"error": Err.Error()}
+	json.NewEncoder(w).Encode(response)
 }
 
 
@@ -25,7 +27,7 @@ func respondWithJSON(w http.ResponseWriter, code int, payload any) {
 	err := json.NewEncoder(&buf).Encode(payload)
 	if err != nil {
 		log.Println(err.Error())
-		ProcessingError(w, 500, err)
+		ProcessingError(w, http.StatusInternalServerError, err)
 		return
 	}
 	
@@ -37,4 +39,27 @@ func respondWithJSON(w http.ResponseWriter, code int, payload any) {
 	if err != nil {
 		log.Println(err.Error())
 	}
+}
+
+/*
+ * if product id of the current purchase is not in inventory
+ * create an inventory for the product id set quantity_on_hand to purchase quantity
+ * else update the inventory  quantity_on_hand to  quantity_on_hand + purchase quantity
+ *
+*/
+
+func (db *Server)NewProduct(purchase *Purchase, w http.ResponseWriter, req *http.Request) {
+	id := purchase.ProductID
+	quantityAdded := purchase.QuantityAdded
+	data, err := db.queries.GetInventory(req.Context(), id)
+	if err != nil {
+		newErr := db.queries.NewInventory(req.Context(), database.NewInventoryParams{ProductID: id, QuantityOnHand: quantityAdded})
+		if newErr != nil {
+			ProcessingError(w, http.StatusBadRequest, newErr)
+			return
+		}
+	}
+	err = db.queries.UpdatedInventory(req.Context(), database.UpdatedInventoryParams{ProductID: id, 
+		QuantityOnHand: quantityAdded + data.QuantityOnHand})
+
 }

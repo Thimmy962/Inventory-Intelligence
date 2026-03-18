@@ -32,3 +32,4 @@ go.work.sum
 # .vscode/
 add_products.py
 products.csv
+sql/queries/add_purchase.py

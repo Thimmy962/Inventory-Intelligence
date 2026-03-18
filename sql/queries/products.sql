@@ -14,3 +14,6 @@ SELECT * FROM products WHERE id = $1;
 
 -- name: DeleteProduct :exec
 DELETE FROM products WHERE id = $1;
+
+-- name: UpdateProductPrice :exec
+UPDATE products SET price = $2 WHERE id = $1;

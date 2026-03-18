@@ -18,7 +18,7 @@ type Adjustment struct {
 
 type Inventory struct {
 	ProductID      string
-	QuantityOnHand sql.NullInt32
+	QuantityOnHand int32
 	LastUpdated    sql.NullTime
 }
 

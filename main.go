@@ -40,9 +40,10 @@ func main() {
 	
 	serMux.HandleFunc("GET /", dbServer.CORSMiddleware(dbServer.sayHello))
 	serMux.HandleFunc("POST /newproduct/", dbServer.CORSMiddleware(dbServer.CreateProduct))
-	serMux.HandleFunc("POST /bulkcreate/", dbServer.CORSMiddleware(dbServer.BulkCreateProducts))
-	serMux.HandleFunc("GET /products/", dbServer.CORSMiddleware(dbServer.GetProducts))
 	serMux.HandleFunc("GET /product/{id}/", dbServer.CORSMiddleware(dbServer.GetProduct))
+	serMux.HandleFunc("GET /products/", dbServer.CORSMiddleware(dbServer.GetProducts))
+	serMux.HandleFunc("POST /bulkpurchase/", dbServer.CORSMiddleware(dbServer.NewBulkPurchase))
+	serMux.HandleFunc("POST /purchase/", dbServer.CORSMiddleware(dbServer.NewPurchase))
 
 	log.Println(server.ListenAndServe());
 }
