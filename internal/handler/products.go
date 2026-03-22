@@ -30,8 +30,8 @@ type Product struct {
 }
 
 type Purchase struct {
-	ID            string `json:"id`
-	ProductID     string `json:"productId`
+	ID            string `json:"id"`
+	ProductID     string `json:"productId"`
 	QuantityAdded int32  `json:"quantity"`
 }
 
