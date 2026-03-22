@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"main/internal/app"
 	"main/internal/database"
 	"net/http"
 )
@@ -31,14 +32,10 @@ func respondWithJSON(w http.ResponseWriter, code int, payload any) {
 		return
 	}
 	
-	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", buf.Len()))
 	w.WriteHeader(code)
 
-	_, err = w.Write(buf.Bytes())
-	if err != nil {
-		log.Println(err.Error())
-	}
+	json.NewEncoder(w).Encode(buf)
 }
 
 /*
@@ -62,4 +59,25 @@ func (db *Handler)NewProduct(purchase *Purchase, w http.ResponseWriter, req *htt
 	err = db.server.Queries.UpdatedInventory(req.Context(), database.UpdatedInventoryParams{ProductID: id, 
 		QuantityOnHand: quantityAdded + data.QuantityOnHand})
 
+}
+
+// interface context.Context
+func validateSale(req *http.Request, items []Sales_Item, query app.Server) ([]database.GetProductInventoryRow, float64, error) {
+	var products []database.GetProductInventoryRow
+	var total  = 0.0 // sum of all the sales item
+	for _, item := range items {
+		product, err := query.Queries.GetProductInventory(req.Context(), item.Product_id)
+		if err != nil {
+			return nil, 0, err
+		} else if (product.QuantityOnHand < item.Quantity_sold){
+			return nil, 0, fmt.Errorf("Quantity on hand of %s is less than request to buy", product.ProductName)
+		}
+
+		//price * quantity
+		total = total + (product.Price * float64(item.Quantity_sold))
+		
+		// append to the list
+		products = append(products, product)
+	}
+	return products, total, nil
 }

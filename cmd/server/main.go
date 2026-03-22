@@ -37,11 +37,12 @@ func main() {
 	dbQuery := handler.NewHandler(dbServer)
 	
 	serMux.HandleFunc("GET /", dbServer.CORSMiddleware(dbServer.SayHello))
-	serMux.HandleFunc("POST /newproduct/", dbServer.CORSMiddleware(dbQuery.CreateProduct))
-	serMux.HandleFunc("GET /product/{id}/", dbServer.CORSMiddleware(dbQuery.GetProduct))
-	serMux.HandleFunc("GET /products/", dbServer.CORSMiddleware(dbQuery.GetProducts))
-	serMux.HandleFunc("POST /bulkpurchase/", dbServer.CORSMiddleware(dbQuery.NewBulkPurchase))
-	serMux.HandleFunc("POST /purchase/", dbServer.CORSMiddleware(dbQuery.NewPurchase))
+	serMux.HandleFunc("POST /newproduct", dbServer.CORSMiddleware(dbQuery.CreateProduct))
+	serMux.HandleFunc("GET /product/{id}", dbServer.CORSMiddleware(dbQuery.GetProduct))
+	serMux.HandleFunc("GET /products", dbServer.CORSMiddleware(dbQuery.GetProducts))
+	serMux.HandleFunc("POST /bulkpurchase", dbServer.CORSMiddleware(dbQuery.NewBulkPurchase))
+	serMux.HandleFunc("POST /purchase", dbServer.CORSMiddleware(dbQuery.NewPurchase))
+	serMux.HandleFunc("POST /sales", dbServer.CORSMiddleware(dbQuery.CreateSales))
 
 	log.Println(server.ListenAndServe());
 }

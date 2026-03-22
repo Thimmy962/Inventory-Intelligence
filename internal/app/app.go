@@ -25,6 +25,7 @@ func (s *Server) CORSMiddleware(next http.HandlerFunc)  http.HandlerFunc{
         w.Header().Set("Access-Control-Allow-Origin", "*")
         w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Apikey")
         w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Content-Type", "application/json")
 
 		next(w, req)
 	}

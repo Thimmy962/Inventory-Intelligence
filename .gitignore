@@ -33,3 +33,4 @@ go.work.sum
 add_products.py
 products.csv
 sql/queries/add_purchase.py
+scripts/
