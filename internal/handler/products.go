@@ -1,22 +1,31 @@
 package handler
 
 import (
+	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"html/template"
 	"log"
 	"main/internal/app"
 	"main/internal/database"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 type Handler struct {
 	server *app.Server
+	tmpl *template.Template
 }
 
-func NewHandler(q *app.Server) *Handler {
+func NewHandler(q *app.Server, tmpl *template.Template) *Handler {
 	return &Handler{
 		server: q,
+		tmpl: tmpl,
+
 	}
 }
 
@@ -40,8 +49,8 @@ func (db *Handler) CreateProduct(writer http.ResponseWriter, req *http.Request) 
 
 	err := json.NewDecoder(req.Body).Decode(&product)
 	if err != nil {
-		go log.Println(err)
-		go ProcessingError(writer, 400, err)
+		log.Println(err)
+		ProcessingError(writer, 400, err)
 		return
 	}
 
@@ -49,21 +58,26 @@ func (db *Handler) CreateProduct(writer http.ResponseWriter, req *http.Request) 
 		ProductName: product.ProductName, Price: product.Price, ReorderLevel: product.ReorderLevel,
 	})
 	if err != nil {
-		go log.Printf("DB error value: %s", err.Error())
-		go ProcessingError(writer, 400, err)
+		log.Printf("DB error value: %s", err.Error())
+		ProcessingError(writer, 400, err)
 		return
 	}
-	go respondWithJSON(writer, 201, created_product)
+	respondWithJSON(writer, 201, created_product)
 }
 
 func (db *Handler) GetProducts(writer http.ResponseWriter, req *http.Request) {
-	products, err := db.server.Queries.GetProducts(req.Context())
+	ctx, cancel := context.WithTimeout(req.Context(), 3 * time.Second)
+	defer cancel()
+	products, err := db.server.Queries.GetProducts(ctx)
 	if err != nil {
-		go log.Printf("DB error value: %s", err.Error())
-		go ProcessingError(writer, 400, err)
+		if errors.Is(err, sql.ErrNoRows) {
+            ProcessingError(writer, http.StatusNotFound, errors.New("product not found"))
+            return
+        }
+		ProcessingError(writer, http.StatusInternalServerError, err)
 		return
 	}
-	go respondWithJSON(writer, 200, products)
+	respondWithJSON(writer, 200, products)
 }
 
 func (db *Handler) BulkCreateProducts(w http.ResponseWriter, r *http.Request) {
@@ -71,8 +85,8 @@ func (db *Handler) BulkCreateProducts(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&products)
 	if err != nil {
-		go log.Println(err)
-		go ProcessingError(w, 400, err)
+		log.Println(err)
+		ProcessingError(w, 400, err)
 		return
 	}
 
@@ -87,23 +101,31 @@ func (db *Handler) BulkCreateProducts(w http.ResponseWriter, r *http.Request) {
 		)
 
 		if err != nil {
-			go log.Println(err)
-			go ProcessingError(w, 400, err)
+			log.Println(err)
+			ProcessingError(w, 400, err)
 			return
 		}
 	}
 
-	go respondWithJSON(w, 201, map[string]string{
+	respondWithJSON(w, 201, map[string]string{
 		"status": "products inserted",
 	})
 }
 
 func (db *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
-	data, err := db.server.Queries.GetProduct(r.Context(), id)
+	vars := mux.Vars(r)
+	id := vars["id"]
+	ctx, cancel := context.WithTimeout(r.Context(), 3 * time.Second)
+	defer cancel()
+	data, err := db.server.Queries.GetProduct(ctx, id)
 	if err != nil {
-		go log.Println(err)
-		go ProcessingError(w, http.StatusNotFound, err)
+		if errors.Is(err, sql.ErrNoRows) {
+            ProcessingError(w, http.StatusNotFound, errors.New("product not found"))
+            return
+        } else if errors.Is(err, context.DeadlineExceeded) {
+			ProcessingError(w, http.StatusGatewayTimeout, err)
+		}
+		ProcessingError(w, http.StatusInternalServerError, err)
 		return
 	}
 	respondWithJSON(w, http.StatusOK, data)
@@ -113,8 +135,8 @@ func (db *Handler) NewBulkPurchase(w http.ResponseWriter, r *http.Request) {
 	var purchases []Purchase
 	err := json.NewDecoder(r.Body).Decode(&purchases)
 	if err != nil {
-		go log.Println(err)
-		go ProcessingError(w, http.StatusBadRequest, err)
+		log.Println(err)
+		ProcessingError(w, http.StatusBadRequest, err)
 		return
 	}
 
@@ -123,18 +145,18 @@ func (db *Handler) NewBulkPurchase(w http.ResponseWriter, r *http.Request) {
 			database.CreatePurchaseParams{ProductID: purchase.ProductID,
 				QuantityAdded: purchase.QuantityAdded})
 		if err != nil {
-			go log.Println(err)
-			go ProcessingError(w, http.StatusBadRequest, err)
+			log.Println(err)
+			ProcessingError(w, http.StatusBadRequest, err)
 			return
 		}
 		if db.Inventory(&purchase, w, r) != nil {
 			err = db.server.Queries.DeleteProduct(r.Context(), purchase.ID)
-			go ProcessingError(w, http.StatusBadRequest, fmt.Errorf("Could not delete product after failed update of inventory; Delete manualy"))
+			ProcessingError(w, http.StatusBadRequest, fmt.Errorf("Could not delete product after failed update of inventory; Delete manualy"))
 			return
 		}
 	}
 
-	go respondWithJSON(w, http.StatusCreated, map[string]string{
+	respondWithJSON(w, http.StatusCreated, map[string]string{
 		"status": "purchase inserted",
 	})
 }
@@ -146,8 +168,8 @@ func (db *Handler) NewPurchase(w http.ResponseWriter, r *http.Request) {
 	var purchase Purchase
 	err := json.NewDecoder(r.Body).Decode(&purchase)
 	if err != nil {
-		go log.Println(err)
-		go ProcessingError(w, http.StatusBadRequest, err)
+		log.Println(err)
+		ProcessingError(w, http.StatusBadRequest, err)
 		return
 	}
 
@@ -158,8 +180,8 @@ func (db *Handler) NewPurchase(w http.ResponseWriter, r *http.Request) {
 
 	// if there is an error in creating new purchase return
 	if err != nil {
-		go log.Println(err)
-		go ProcessingError(w, http.StatusBadRequest, err)
+		log.Println(err)
+		ProcessingError(w, http.StatusBadRequest, err)
 		return
 	}
 
@@ -189,8 +211,8 @@ func (db *Handler) Inventory(purchase *Purchase, w http.ResponseWriter, req *htt
 		
 		// if creatting a new inventory fails return
 		if newErr != nil {
-			go log.Println(err)
-			go ProcessingError(w, http.StatusBadRequest, newErr)
+			log.Println(err)
+			ProcessingError(w, http.StatusBadRequest, newErr)
 
 			return newErr
 		}

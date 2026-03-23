@@ -32,7 +32,7 @@ func (db *Handler) CreateSales(wr http.ResponseWriter, req *http.Request) {
 	var items []Sales_Item // list of items under a sales
 	err := json.NewDecoder(req.Body).Decode(&items);
 	if err != nil {
-		go ProcessingError(wr, http.StatusBadRequest, err)
+		ProcessingError(wr, http.StatusBadRequest, err)
 		return
 	}
 
@@ -43,14 +43,14 @@ func (db *Handler) CreateSales(wr http.ResponseWriter, req *http.Request) {
 	*/
 	products, total, err := validateSale(req, items, *db.server)
 	if err != nil {
-		go ProcessingError(wr, http.StatusBadRequest, err)
+		ProcessingError(wr, http.StatusBadRequest, err)
 		return
 	}
 
 	// creates the sales that contains all the sold items; returns an error(if available) and the id of the newly created sales
 	sales_id, err := db.server.Queries.CreateSales(req.Context(), total)
 	if err != nil {
-		go ProcessingError(wr, http.StatusBadRequest, err)
+		ProcessingError(wr, http.StatusBadRequest, err)
 		return
 	}
 
@@ -60,12 +60,12 @@ func (db *Handler) CreateSales(wr http.ResponseWriter, req *http.Request) {
 		})
 		// if there was error in processing any item delete every other processed items and the sales it self
 		if err != nil {
-			go ProcessingError(wr, http.StatusBadRequest, err)
+			ProcessingError(wr, http.StatusBadRequest, err)
 			// delete every other sales_item under this sales
-			go db.server.Queries.DeleteSalesItems(req.Context(), sales_id)
+			db.server.Queries.DeleteSalesItems(req.Context(), sales_id)
 
 			// delete the sales itself
-			go db.server.Queries.DeleteSales(req.Context(), sales_id)
+			db.server.Queries.DeleteSales(req.Context(), sales_id)
 			return
 		}
 	}
@@ -73,10 +73,10 @@ func (db *Handler) CreateSales(wr http.ResponseWriter, req *http.Request) {
 	for index, product := range products {
 		//quantity left = quantity before the sale - quantity sold
 		quantity_left := product.QuantityOnHand - items[index].Quantity_sold
-		go db.server.Queries.UpdatedInventory(req.Context(), 
+		db.server.Queries.UpdatedInventory(req.Context(), 
 		database.UpdatedInventoryParams{ProductID: product.ID, QuantityOnHand: quantity_left})
 	}
-	go respondWithJSON(wr, http.StatusCreated, map[string]string{
+	respondWithJSON(wr, http.StatusCreated, map[string]string{
 		"status": "Sales Successful",
 	})
 }
@@ -86,8 +86,8 @@ func (db *Handler) CreateAdjustment(wr http.ResponseWriter, req *http.Request) {
 	var adjustment Adjustment
 	err := json.NewDecoder(req.Body).Decode(&adjustment)
 	if err != nil {
-		go log.Println(err)
-		go ProcessingError(wr, http.StatusBadRequest, err)
+		log.Println(err)
+		ProcessingError(wr, http.StatusBadRequest, err)
 		return
 	}
 
@@ -97,18 +97,18 @@ func (db *Handler) CreateAdjustment(wr http.ResponseWriter, req *http.Request) {
 	
 	// if there is an error while creating process error and return
 	if err != nil {
-		go log.Println(err)
-		go ProcessingError(wr, http.StatusBadRequest, err)
+		log.Println(err)
+		ProcessingError(wr, http.StatusBadRequest, err)
 		return
 	}
 
 	// if there is an error while retrieving inventory to be updated delete the adjustment
 	inventory, err := db.server.Queries.GetInventory(req.Context(), adjustment.ProductID)
 	if err != nil {
-		go log.Println(err)
-		go ProcessingError(wr, http.StatusBadRequest, err)
+		log.Println(err)
+		ProcessingError(wr, http.StatusBadRequest, err)
 
-		go db.server.Queries.DeleteAdjustment(req.Context(),id)
+		db.server.Queries.DeleteAdjustment(req.Context(),id)
 		return
 
 	}
@@ -117,10 +117,10 @@ func (db *Handler) CreateAdjustment(wr http.ResponseWriter, req *http.Request) {
 		newVal = 0
 	}
 
-	go db.server.Queries.UpdatedInventory(req.Context(), 
+	db.server.Queries.UpdatedInventory(req.Context(), 
 	database.UpdatedInventoryParams{ProductID: inventory.ProductID, QuantityOnHand: newVal})
 
-	go respondWithJSON(wr, http.StatusCreated, map[string]string {
+	respondWithJSON(wr, http.StatusCreated, map[string]string {
 		"status": "Adjustment Created",
 	})
 }

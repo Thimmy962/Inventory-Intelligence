@@ -4,39 +4,51 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"main/internal/app"
 	"main/internal/database"
 	"net/http"
 )
 
 // called on bad request
-func ProcessingError(w http.ResponseWriter, code int, Err error) {
-	w.Header().Set("Content-Type", "apllication/json")
-	w.WriteHeader(code)
-	response := map[string]string{"error": Err.Error()}
-	json.NewEncoder(w).Encode(response)
+func ProcessingError(w http.ResponseWriter, code int, Err error) {    
+    w.Header().Set("Content-Type", "application/json") // Fixed typo
+    w.WriteHeader(code)
+    
+    response := map[string]string{"error": Err.Error()}
+    _ = json.NewEncoder(w).Encode(response) 
 }
 
 
 
 // handles both writing a single struct or a list of structs to responseWriter
 // all thanks to NewEncoder
+
 func respondWithJSON(w http.ResponseWriter, code int, payload any) {
-	var buf bytes.Buffer
+    var buf bytes.Buffer
 
-	err := json.NewEncoder(&buf).Encode(payload)
-	if err != nil {
-		log.Println(err.Error())
-		ProcessingError(w, http.StatusInternalServerError, err)
-		return
-	}
-	
+    json.NewEncoder(&buf).Encode(payload)
+
+
+
+    w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", buf.Len()))
-	w.WriteHeader(code)
+    
+    // 3. If the code above didn't return, this is the FIRST 
+    // and ONLY time WriteHeader should be called.
+    w.WriteHeader(code) 
 
-	json.NewEncoder(w).Encode(buf)
+    w.Write(buf.Bytes())
 }
+
+// func respondWithJSON(w http.ResponseWriter, code int, payload any) {
+// 	w.Header().Set("Content-Type", "application/json")
+
+// 	w.WriteHeader(code)
+
+// 	if err := json.NewEncoder(w).Encode(payload); err != nil {
+// 		log.Println(err)
+// 	}
+// }
 
 /*
  * if product id of the current purchase is not in inventory

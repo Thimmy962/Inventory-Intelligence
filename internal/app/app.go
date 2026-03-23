@@ -30,3 +30,16 @@ func (s *Server) CORSMiddleware(next http.HandlerFunc)  http.HandlerFunc{
 		next(w, req)
 	}
 }
+
+func (s *Server) HTMLCORSMiddleware(next http.HandlerFunc)  http.HandlerFunc{
+	return  func(w http.ResponseWriter, req *http.Request) {
+        // CORS headers
+        w.Header().Set("Access-Control-Allow-Origin", "*")
+        w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Apikey")
+        w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Content-Type", "text/html")
+
+		next(w, req)
+	}
+}
+
