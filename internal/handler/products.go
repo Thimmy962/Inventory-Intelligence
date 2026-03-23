@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"html/template"
 	"log"
 	"main/internal/app"
 	"main/internal/database"
@@ -18,14 +17,11 @@ import (
 
 type Handler struct {
 	server *app.Server
-	tmpl *template.Template
 }
 
-func NewHandler(q *app.Server, tmpl *template.Template) *Handler {
+func NewHandler(q *app.Server) *Handler {
 	return &Handler{
 		server: q,
-		tmpl: tmpl,
-
 	}
 }
 

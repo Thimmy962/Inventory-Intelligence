@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed": "#8df8b7",
+              "on-tertiary": "#ffffff",
+              "on-secondary": "#ffffff",
+              "on-primary-container": "#fdfff9",
+              "tertiary-fixed-dim": "#ecc243",
+              "inverse-primary": "#70db9d",
+              "on-background": "#191c1c",
+              "secondary-container": "#dee4e0",
+              "primary-container": "#008751",
+              "error-container": "#ffdad6",
+              "surface-container-high": "#e7e8e8",
+              "background": "#f8f9f9",
+              "surface-container-low": "#f3f4f4",
+              "on-error-container": "#93000a",
+              "surface": "#f8f9f9",
+              "surface-dim": "#d9dada",
+              "on-surface-variant": "#3e4a41",
+              "on-primary": "#ffffff",
+              "on-secondary-container": "#606663",
+              "primary-fixed-dim": "#70db9d",
+              "on-primary-fixed-variant": "#00522f",
+              "primary": "#006b3f",
+              "tertiary": "#745b00",
+              "surface-container-highest": "#e1e3e3",
+              "error": "#ba1a1a",
+              "outline": "#6e7a70",
+              "inverse-on-surface": "#f0f1f1",
+              "on-tertiary-fixed": "#241a00",
+              "on-surface": "#191c1c",
+              "on-error": "#ffffff",
+              "on-primary-fixed": "#002110",
+              "surface-variant": "#e1e3e3",
+              "surface-tint": "#006d40",
+              "tertiary-container": "#cda628",
+              "secondary-fixed-dim": "#c2c8c5",
+              "secondary-fixed": "#dee4e0",
+              "secondary": "#5a605d",
+              "outline-variant": "#bdcabe",
+              "on-secondary-fixed": "#171d1b",
+              "surface-bright": "#f8f9f9",
+              "tertiary-fixed": "#ffe08d",
+              "surface-container-lowest": "#ffffff",
+              "inverse-surface": "#2e3131",
+              "surface-container": "#edeeee",
+              "on-secondary-fixed-variant": "#424846",
+              "on-tertiary-container": "#4f3d00",
+              "on-tertiary-fixed-variant": "#584400"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+    <style>
+        .material-symbols-outlined {
+                font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+            h1, h2, h3, .font-headline { font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .glass-panel {
+                background: rgba(255, 255, 255, 0.8);
+                backdrop-filter: blur(20px);
+        }
+        .stock-pulse {
+                stroke-dasharray: 100;
+                stroke-dashoffset: 20;
+        }
+    </style>
+
+    <title>{{template "title" .}}</title>
+</head>
+<body>
+    <!-- SideNavBar Shell -->
+    <aside class="h-screen w-64 fixed left-0 top-0 bg-slate-50 dark:bg-zinc-950 flex flex-col py-8 px-4 z-50">
+    <div class="mb-10 px-4">
+        <h1 class="text-2xl font-bold text-emerald-900 dark:text-emerald-50 tracking-tight">ShalomGate</h1>
+        <p class="text-xs font-medium text-slate-500 font-plus-jakarta uppercase tracking-widest mt-1">Retail Manager</p>
+    </div>
+    <nav class="flex-1 space-y-1">
+        <!-- Dashboard Active -->
+        <a class="flex items-center gap-3 px-4 py-3 text-emerald-900 dark:text-emerald-50 font-semibold border-r-4 border-emerald-600 bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-colors scale-95 active:duration-150" href="#">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="font-plus-jakarta text-sm font-medium">Dashboard</span>
+        </a>
+        <!-- Inventory -->
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-zinc-500 hover:text-emerald-700 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-colors scale-95 active:duration-150" href="#">
+            <span class="material-symbols-outlined">inventory_2</span>
+            <span class="font-plus-jakarta text-sm font-medium">Inventory</span>
+        </a>
+        <!-- Reports -->
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-zinc-500 hover:text-emerald-700 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-colors scale-95 active:duration-150" href="#">
+            <span class="material-symbols-outlined">analytics</span>
+            <span class="font-plus-jakarta text-sm font-medium">Reports</span>
+        </a>
+        <!-- Settings -->
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-zinc-500 hover:text-emerald-700 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-colors scale-95 active:duration-150" href="#">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="font-plus-jakarta text-sm font-medium">Settings</span>
+        </a>
+    </nav>
+
+    <div class="mt-auto px-4">
+        <div class="mt-8 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center overflow-hidden">
+                <img alt="User profile" class="w-full h-full object-cover" data-alt="Nigerian merchant portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3TdU9i8VIkfHZyjfUDGgmchjdT-RjDeg80U46AYKXQIUf9ADYzUCC5g_hLW_67JX6Plyczd667BpSa6ZOed1I2EnhAErQKuzB5P0QTmqfHvzIwHD6S6YYosvmjOxNETem2TO9xOGR9aVDnygZt_RsnLZNLdjMezt_Q8mbpoAUq0Dmwu6s3VvBuDCEnr-hG53raK9CR04-9ArGDRY702Dogkc6RTCvH_kR6t1Ozoo69lfUZw4OBBjdeLxhY237PWTS_Pego1XvkQ"/>
+            </div>
+            <div class="overflow-hidden">
+                <p class="text-sm font-bold truncate">ShalomGate</p>
+                <p class="text-xs text-slate-500">Ilisan, NG</p>
+            </div>
+        </div>
+    </div>
+    </aside>
+    <!-- Main Canva -->
+    <main class="ml-64 min-h-screen">
+        <!-- TopAppBar Shell -->
+        <header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md flex justify-between items-center h-16 px-8 border-b border-emerald-100/20 dark:border-zinc-800 shadow-sm dark:shadow-none">
+            <h2 class="text-xl font-black text-emerald-800 dark:text-emerald-200 font-plus-jakarta">ShalomGate</h2>
+            <div class="flex items-center gap-6">
+                <div class="relative focus-within:ring-2 focus-within:ring-emerald-500 rounded-lg bg-surface-container-low px-4 py-1.5 flex items-center gap-2 transition-all">
+                    <span class="material-symbols-outlined text-emerald-700 text-lg">search</span>
+                    <input class="bg-transparent border-none focus:ring-0 text-sm w-64 placeholder:text-slate-400" placeholder="Search inventory..." type="text"/>
+                </div>
+                <div class="flex items-center gap-4 text-emerald-700 dark:text-emerald-400">
+                    <button class="hover:opacity-80 transition-opacity">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <button class="hover:opacity-80 transition-opacity">
+                        <span class="material-symbols-outlined">account_circle</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+        {{template "content" .}}
+    </main>
+</body>
+</html>

@@ -1,18 +1,157 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"></script>
+{{ define "title" }}Home Page{{ end }}
 
-    <title>Document</title>
-</head>
-<body>
-    <h1 class="text-3xl font-bold underline text-clifford">
-        Hello world!
-    </h1>
-</body>
-</html>
+{{ define "content" }}
+<!-- Content Area -->
+    <div class="pt-24 pb-12 px-12 space-y-12">
+        <!-- Bento Stats Grid -->
+            <section class="grid grid-cols-12 gap-6">
+            <!-- Total Items -->
+                <div class="col-span-12 md:col-span-4 bg-surface-container-lowest p-8 rounded-xl shadow-sm relative overflow-hidden group">
+                    <div class="relative z-10">
+                        <p class="text-label-md text-slate-500 font-semibold mb-2">Total Stock Value</p>
+                        <h3 class="text-4xl font-extrabold text-on-surface">₦2.4M</h3>
+                        <div class="mt-4 flex items-center gap-2 text-primary font-bold">
+                            <span class="material-symbols-outlined text-sm">trending_up</span>
+                            <span class="text-xs">+12.5% this month</span>
+                        </div>
+                    </div>
+                    <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-9xl">inventory</span>
+                    </div>
+                </div>
+                <!-- Low Stock Alert -->
+                <div class="col-span-12 md:col-span-4 bg-tertiary-fixed p-8 rounded-xl relative overflow-hidden">
+                    <div class="relative z-10">
+                        <p class="text-label-md text-on-tertiary-fixed font-semibold mb-2">Low Stock Items</p>
+                        <h3 class="text-4xl font-extrabold text-on-tertiary-fixed">14</h3>
+                        <div class="mt-4">
+                            <button class="bg-on-tertiary-fixed text-tertiary-fixed px-4 py-2 rounded-full 
+                                text-xs font-bold hover:opacity-90 transition-opacity">View Critical Items
+                            </button>
+                        </div>
+                    </div>
+                    <div class="absolute right-6 top-6">
+                        <span class="material-symbols-outlined text-on-tertiary-fixed/20 text-5xl">warning</span>
+                    </div>
+                </div>
+                <!-- Quick Sale -->
+                <div class="col-span-12 md:col-span-4 bg-primary-container p-8 rounded-xl text-on-primary-container shadow-lg shadow-primary/10">
+                    <p class="text-label-md font-semibold mb-2 opacity-80">Daily Revenue</p>
+                    <h3 class="text-4xl font-extrabold">₦84,200</h3>
+                    <div class="mt-4 flex gap-3">
+                        <button class="flex-1 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-lg py-2 
+                            text-xs font-bold border border-white/10 transition-colors">Record Sale
+                        </button>
+                        <button class="flex-1 bg-white text-primary rounded-lg py-2 text-xs font-bold hover:bg-primary-fixed
+                                transition-colors">Add Item
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+    <!-- Main Dashboard Layout: Inventory & Activities -->
+    <div class="grid grid-cols-12 gap-12">
+        <!-- Top Selling (Text-Focused Grid) -->
+        <div class="col-span-12 lg:col-span-8">
+            <div class="flex justify-between items-end mb-8">
+                <div>
+                <h2 class="text-2xl font-extrabold tracking-tight">Top Selling Items</h2>
+                <p class="text-slate-500 text-sm">Most demanded products this week</p>
+                </div>
+                <button class="text-primary font-bold text-sm hover:underline">View Catalog</button>
+            </div>
+            <div class="grid grid-cols-1 gap-3">
+                <!-- Product Row 1 -->
+                <div class="group bg-surface-container-lowest border border-slate-200 rounded-lg p-4 flex flex-wrap
+                    items-center justify-between transition-all hover:border-emerald-200 hover:shadow-md">
+                    <div class="flex-1 min-w-[200px]">
+                        <div class="flex items-center gap-2">
+                            <h4 class="text-base font-bold text-on-surface">Pepsi (Crate)</h4>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 uppercase border border-emerald-100">In Stock</span>
+                        </div>
+                        <p class="text-xs text-slate-400 font-mono mt-0.5">SKU: BEV-004-NG</p>
+                    </div>
+                    <div class="flex items-center gap-8 text-sm">
+                        <div class="text-right">
+                            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Brand</p>
+                            <p class="font-semibold">PepsiCo</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Pack Size</p>
+                            <p class="font-semibold">24 x 50cl</p>
+                        </div>
+                        <div class="text-right w-24">
+                            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Quantity</p>
+                            <p class="font-bold text-emerald-800">124 Units</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="col-span-12 lg:col-span-4">
+            <div class="bg-white/50 border border-emerald-100/10 rounded-2xl p-8 backdrop-blur-sm">
+                <h2 class="text-xl font-extrabold mb-8 tracking-tight">Recent Activities</h2>
+                <div class="space-y-10">
+                    <!-- Activity 1 -->
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-emerald-700">sell</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-on-surface">Sold 5 crates of Pepsi</p>
+                            <p class="text-xs text-slate-400 mt-1">14 mins ago • POS Terminal 1</p>
+                        </div>
+                    </div>
+                    <!-- Activity 2 -->
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined text-amber-700">inventory</span>
+                        </div>
+                        <div>
+                        <p class="text-sm font-medium text-on-surface">Golden Penny Pasta hit low stock</p>
+                        <p class="text-xs text-slate-400 mt-1">2 hours ago • System Alert</p>
+                        </div>
+                    </div>
+                    <!-- Activity 3 -->
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-emerald-700">add_circle</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-on-surface">Added 50 units of Dano Milk</p>
+                            <p class="text-xs text-slate-400 mt-1">5 hours ago • Admin Adebayo</p>
+                        </div>
+                    </div>
+                    <!-- Activity 4 -->
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-blue-700">receipt_long</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-on-surface">Bulk order: 10 Indomie Cartons</p>
+                            <p class="text-xs text-slate-400 mt-1">Yesterday • Customer: Mama Titi</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="w-full mt-12 py-3 border border-slate-200 rounded-xl text-xs
+                    font-bold text-slate-600 hover:bg-slate-50 transition-colors">View Transaction History
+                </button>
+            </div>
+            <!-- Custom Component: Stock Pulse -->
+            <div class="mt-8 bg-surface-container-highest rounded-2xl p-6">
+                <div class="flex justify-between items-center mb-4">
+                <span class="text-xs font-bold text-on-surface-variant">Store Movement (7d)</span>
+                <span class="text-xs font-bold text-primary">+24%</span>
+                </div>
+                <svg class="w-full h-12" viewbox="0 0 100 30">
+                    <path d="M0,25 Q15,5 30,20 T60,10 T100,22" fill="none" stroke="#006b3f" stroke-width="2"></path>
+                </svg>
+            </div>
+        </div>
+        <button class="fixed bottom-12 right-12 w-16 h-16 rounded-full bg-primary text-on-primary shadow-2xl shadow-primary/40 flex items-center justify-center group transition-transform active:scale-90 z-50 overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-tr from-primary to-primary-container opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<span class="material-symbols-outlined relative z-10 text-3xl font-bold">add</span>
+</button>
+{{ end }}
