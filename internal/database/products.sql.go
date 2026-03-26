@@ -46,6 +46,63 @@ func (q *Queries) DeleteProduct(ctx context.Context, id string) error {
 	return err
 }
 
+const getFullProductDetail = `-- name: GetFullProductDetail :many
+SELECT 
+  p.id,
+  p.product_name,
+  i.quantity_on_hand,
+  p.price,
+  p.reorder_level,
+  CASE 
+    WHEN i.quantity_on_hand = 0 THEN -2
+    WHEN i.quantity_on_hand <= p.reorder_level THEN -1
+    WHEN i.quantity_on_hand <= p.reorder_level * 1.5 THEN 0
+    ELSE 1
+  END AS stock_status
+FROM products p
+JOIN inventory i
+ON p.id = i.product_id
+`
+
+type GetFullProductDetailRow struct {
+	ID             string
+	ProductName    string
+	QuantityOnHand int32
+	Price          float64
+	ReorderLevel   int32
+	StockStatus    int32
+}
+
+func (q *Queries) GetFullProductDetail(ctx context.Context) ([]GetFullProductDetailRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFullProductDetail)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFullProductDetailRow
+	for rows.Next() {
+		var i GetFullProductDetailRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProductName,
+			&i.QuantityOnHand,
+			&i.Price,
+			&i.ReorderLevel,
+			&i.StockStatus,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getProduct = `-- name: GetProduct :one
 SELECT id, product_name, created_at, updated_at, price, reorder_level FROM products WHERE id = $1
 `

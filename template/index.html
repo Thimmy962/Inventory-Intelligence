@@ -50,7 +50,7 @@
             </section>
 
     <!-- Main Dashboard Layout: Inventory & Activities -->
-    <div class="grid grid-cols-12 gap-12">
+    <div class="">
         <!-- Top Selling (Text-Focused Grid) -->
         <div class="col-span-12 lg:col-span-8">
             <div class="flex justify-between items-end mb-8">
@@ -60,98 +60,67 @@
                 </div>
                 <button class="text-primary font-bold text-sm hover:underline">View Catalog</button>
             </div>
-            <div class="grid grid-cols-1 gap-3">
-                <!-- Product Row 1 -->
-                <div class="group bg-surface-container-lowest border border-slate-200 rounded-lg p-4 flex flex-wrap
-                    items-center justify-between transition-all hover:border-emerald-200 hover:shadow-md">
-                    <div class="flex-1 min-w-[200px]">
-                        <div class="flex items-center gap-2">
-                            <h4 class="text-base font-bold text-on-surface">Pepsi (Crate)</h4>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 uppercase border border-emerald-100">In Stock</span>
-                        </div>
-                        <p class="text-xs text-slate-400 font-mono mt-0.5">SKU: BEV-004-NG</p>
-                    </div>
-                    <div class="flex items-center gap-8 text-sm">
-                        <div class="text-right">
-                            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Brand</p>
-                            <p class="font-semibold">PepsiCo</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Pack Size</p>
-                            <p class="font-semibold">24 x 50cl</p>
-                        </div>
-                        <div class="text-right w-24">
-                            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Quantity</p>
-                            <p class="font-bold text-emerald-800">124 Units</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="grid grid-cols-1 gap-1">
+            <!-- Product Header -->
+            <div class="grid grid-cols-12 px-6 py-4 text-[11px] font-bold text-outline uppercase tracking-widest border-b border-outline-variant/20">
+                <div class="col-span-5">Product Name</div>
+                <div class="col-span-2">ReorderLevel</div>
+                <div class="col-span-3 text-center">Stock Level</div>
+                <div class="col-span-2 text-right">Unit Price</div>
             </div>
+            <div class="grid grid-cols-1 gap-1">
+                <!-- Product Row 1 -->
+                {{range .products}}
+                    <div class="grid grid-cols-12 items-center px-6 py-4 bg-white border-b border-outline-variant/10 hover:bg-primary/5 transition-all group cursor-pointer">
+                        <div class="col-span-5">
+                            <h5 class="text-base font-bold text-on-surface group-hover:text-primary transition-colors">{{.ProductName}}</h5>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border 
+                                    {{ if eq .StockStatus 1 }} 
+                                        bg-emerald-50 text-emerald-700 border-emerald-100 
+                                    {{ else if eq .StockStatus 0 }} 
+                                        bg-yellow-100 text-yellow-700 border-yellow-100 
+                                    {{ else if eq .StockStatus -1 }}
+                                        bg-red-100 text-yellow-700 border-yellow-100
+                                    {{ else }}
+                                        bg-red-300 text-red-700 border-red-100 
+                                    {{ end }}">
+                                    
+                                    {{ if eq .StockStatus 1 }}
+                                        In Stock
+                                    {{ else if eq .StockStatus 0 }}
+                                        Low Stock
+                                    {{ else if eq .StockStatus -1 }}
+                                        Reorder Soon
+                                    {{ else }}
+                                        Reorder Now
+                                    {{ end }}
+                                </span>
+                        </div>
+                        <div class="col-span-2">
+                            <span class="px-2 py-0.5 text-primary text-[10px] font-bold rounded-sm uppercase">{{.ReorderLevel}}</span>
+                        </div>
+                        <div class="col-span-3 flex flex-col items-center gap-1.5">
+                            <div class="w-24 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+                                {{if eq .StockStatus 1}}
+                                    <div class="w-4/5 h-full bg-primary rounded-full"></div>
+                                {{else if eq .StockStatus 0}}
+                                    <div class="w-3/5 h-full bg-secondary rounded-full"></div>
+                                {{else if eq .StockStatus -1}}
+                                    <div class="w-2/5 h-full bg-tertiary rounded-full"></div>
+                                {{else}}
+                                    <div class="w-1/5 h-full bg-error rounded-full"></div>
+                                {{end}}
+                            </div>
+                            <span class="text-[10px] font-black text-primary">{{.QuantityOnHand}} IN STOCK</span>
+                        </div>
+                        <div class="col-span-2 text-right">
+                        <p class="text-base font-black text-on-surface">₦ {{.Price}}</p>
+                        </div>
+                    </div>
+                {{end}}
+            </div>
+        </div>
+        </div>
         </div>
 
-        <!-- Recent Activities -->
-        <div class="col-span-12 lg:col-span-4">
-            <div class="bg-white/50 border border-emerald-100/10 rounded-2xl p-8 backdrop-blur-sm">
-                <h2 class="text-xl font-extrabold mb-8 tracking-tight">Recent Activities</h2>
-                <div class="space-y-10">
-                    <!-- Activity 1 -->
-                    <div class="flex gap-4">
-                        <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                            <span class="material-symbols-outlined text-emerald-700">sell</span>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-on-surface">Sold 5 crates of Pepsi</p>
-                            <p class="text-xs text-slate-400 mt-1">14 mins ago • POS Terminal 1</p>
-                        </div>
-                    </div>
-                    <!-- Activity 2 -->
-                    <div class="flex gap-4">
-                        <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0">
-                        <span class="material-symbols-outlined text-amber-700">inventory</span>
-                        </div>
-                        <div>
-                        <p class="text-sm font-medium text-on-surface">Golden Penny Pasta hit low stock</p>
-                        <p class="text-xs text-slate-400 mt-1">2 hours ago • System Alert</p>
-                        </div>
-                    </div>
-                    <!-- Activity 3 -->
-                    <div class="flex gap-4">
-                        <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                            <span class="material-symbols-outlined text-emerald-700">add_circle</span>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-on-surface">Added 50 units of Dano Milk</p>
-                            <p class="text-xs text-slate-400 mt-1">5 hours ago • Admin Adebayo</p>
-                        </div>
-                    </div>
-                    <!-- Activity 4 -->
-                    <div class="flex gap-4">
-                        <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
-                            <span class="material-symbols-outlined text-blue-700">receipt_long</span>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-on-surface">Bulk order: 10 Indomie Cartons</p>
-                            <p class="text-xs text-slate-400 mt-1">Yesterday • Customer: Mama Titi</p>
-                        </div>
-                    </div>
-                </div>
-                <button class="w-full mt-12 py-3 border border-slate-200 rounded-xl text-xs
-                    font-bold text-slate-600 hover:bg-slate-50 transition-colors">View Transaction History
-                </button>
-            </div>
-            <!-- Custom Component: Stock Pulse -->
-            <div class="mt-8 bg-surface-container-highest rounded-2xl p-6">
-                <div class="flex justify-between items-center mb-4">
-                <span class="text-xs font-bold text-on-surface-variant">Store Movement (7d)</span>
-                <span class="text-xs font-bold text-primary">+24%</span>
-                </div>
-                <svg class="w-full h-12" viewbox="0 0 100 30">
-                    <path d="M0,25 Q15,5 30,20 T60,10 T100,22" fill="none" stroke="#006b3f" stroke-width="2"></path>
-                </svg>
-            </div>
-        </div>
-        <button class="fixed bottom-12 right-12 w-16 h-16 rounded-full bg-primary text-on-primary shadow-2xl shadow-primary/40 flex items-center justify-center group transition-transform active:scale-90 z-50 overflow-hidden">
-<div class="absolute inset-0 bg-gradient-to-tr from-primary to-primary-container opacity-0 group-hover:opacity-100 transition-opacity"></div>
-<span class="material-symbols-outlined relative z-10 text-3xl font-bold">add</span>
-</button>
-{{ end }}
+        {{ end }}

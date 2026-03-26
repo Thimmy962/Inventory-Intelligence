@@ -2,9 +2,9 @@
 INSERT INTO sales (total_amount, sale_date)
 VALUES ($1, NOW()) RETURNING id;
 
--- name: CreateSalesItems :exec
+-- name: CreateSalesItems :one
 INSERT INTO sales_items (sales_id, product_id, quantity_sold, price_at_sale)
-VALUES ($1, $2, $3, $4);
+VALUES ($1, $2, $3, $4) RETURNING id, product_id;
 
 -- name: DeleteSalesItems :exec
 DELETE FROM sales_items WHERE sales_id = $1;

@@ -55,7 +55,7 @@ func (db *Handler) CreateSales(wr http.ResponseWriter, req *http.Request) {
 	}
 
 	for index, product := range products {
-		err = db.server.Queries.CreateSalesItems(req.Context(), database.CreateSalesItemsParams{
+		analyticsData, err := db.server.Queries.CreateSalesItems(req.Context(), database.CreateSalesItemsParams{
 			SalesID: sales_id, ProductID: product.ID, PriceAtSale: product.Price, QuantitySold: items[index].Quantity_sold,
 		})
 		// if there was error in processing any item delete every other processed items and the sales it self
@@ -68,6 +68,8 @@ func (db *Handler) CreateSales(wr http.ResponseWriter, req *http.Request) {
 			db.server.Queries.DeleteSales(req.Context(), sales_id)
 			return
 		}
+
+		db.channel <- analyticsData
 	}
 
 	for index, product := range products {

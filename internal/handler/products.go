@@ -10,6 +10,7 @@ import (
 	"main/internal/app"
 	"main/internal/database"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -17,21 +18,30 @@ import (
 
 type Handler struct {
 	server *app.Server
+	channel chan any
+	wg sync.WaitGroup
 }
 
-func NewHandler(q *app.Server) *Handler {
+func NewHandler(q *app.Server, channel chan any, w sync.WaitGroup) *Handler {
 	return &Handler{
 		server: q,
+		channel: channel,
+		wg: w,
+
 	}
 }
 
+// used for creating a new product
 type Product struct {
 	ID           string    `json:"id"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
 	Price        float64   `json:"price"`
 	ReorderLevel int32     `json:"reorder_level"`
 	ProductName  string    `json:"name"`
+}
+
+//used for creating a new product, purchase and inventory
+type NewProduct struct {
+	// todo...
 }
 
 type Purchase struct {

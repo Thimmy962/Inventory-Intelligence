@@ -39,9 +39,9 @@ func (q *Queries) CreateSales(ctx context.Context, totalAmount float64) (int32, 
 	return id, err
 }
 
-const createSalesItems = `-- name: CreateSalesItems :exec
+const createSalesItems = `-- name: CreateSalesItems :one
 INSERT INTO sales_items (sales_id, product_id, quantity_sold, price_at_sale)
-VALUES ($1, $2, $3, $4)
+VALUES ($1, $2, $3, $4) RETURNING id, product_id
 `
 
 type CreateSalesItemsParams struct {
@@ -51,14 +51,21 @@ type CreateSalesItemsParams struct {
 	PriceAtSale  float64
 }
 
-func (q *Queries) CreateSalesItems(ctx context.Context, arg CreateSalesItemsParams) error {
-	_, err := q.db.ExecContext(ctx, createSalesItems,
+type CreateSalesItemsRow struct {
+	ID        int32
+	ProductID string
+}
+
+func (q *Queries) CreateSalesItems(ctx context.Context, arg CreateSalesItemsParams) (CreateSalesItemsRow, error) {
+	row := q.db.QueryRowContext(ctx, createSalesItems,
 		arg.SalesID,
 		arg.ProductID,
 		arg.QuantitySold,
 		arg.PriceAtSale,
 	)
-	return err
+	var i CreateSalesItemsRow
+	err := row.Scan(&i.ID, &i.ProductID)
+	return i, err
 }
 
 const deleteAdjustment = `-- name: DeleteAdjustment :exec

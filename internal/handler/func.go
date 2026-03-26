@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"main/internal/app"
 	"main/internal/database"
 	"net/http"
@@ -93,3 +94,21 @@ func validateSale(req *http.Request, items []Sales_Item, query app.Server) ([]da
 	}
 	return products, total, nil
 }
+
+
+func (handler *Handler)StartWorker(workers int) {
+	log.Println("starting Workers")
+	log.Printf("%d Workers Starting\n", workers)
+
+	for i:=0; i < workers; i++ {
+		for salesID := range handler.channel {
+			handler.wg.Add(1)
+			log.Println(salesID)
+			handler.wg.Done()
+	}
+
+	}
+
+
+}
+
