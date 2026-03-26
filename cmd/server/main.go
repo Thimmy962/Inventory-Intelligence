@@ -56,7 +56,7 @@ func main() {
 	server := http.Server{Addr: ":"+ port, Handler: serMux}
 	channel := make(chan any, 100)
 	var wg sync.WaitGroup
-	dbQuery := handler.NewHandler(dbServer, channel, wg)
+	dbQuery := handler.NewHandler(dbServer, channel, &wg)
 
 	go dbQuery.StartWorker(workers)
 	

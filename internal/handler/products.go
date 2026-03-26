@@ -19,10 +19,10 @@ import (
 type Handler struct {
 	server *app.Server
 	channel chan any
-	wg sync.WaitGroup
+	wg *sync.WaitGroup
 }
 
-func NewHandler(q *app.Server, channel chan any, w sync.WaitGroup) *Handler {
+func NewHandler(q *app.Server, channel chan any, w *sync.WaitGroup) *Handler {
 	return &Handler{
 		server: q,
 		channel: channel,
