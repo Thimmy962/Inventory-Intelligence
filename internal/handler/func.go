@@ -105,10 +105,7 @@ func (handler *Handler)StartWorker(workers int) {
 			handler.wg.Add(1)
 			log.Println(salesID)
 			handler.wg.Done()
+		}
 	}
-
-	}
-
-
 }
 

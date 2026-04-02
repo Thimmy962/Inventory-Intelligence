@@ -34,7 +34,7 @@ func main() {
         // Use = here as well to update the existing variables
         workers, err = strconv.Atoi(sworkers) 
         if err != nil {
-            log.Println(err)
+            log.Printf("Could not convert '%s' to int", sworkers)
             os.Exit(1)
         }
     }
@@ -68,7 +68,8 @@ func main() {
 	serMux.HandleFunc("/purchase", dbServer.CORSMiddleware(dbQuery.NewPurchase)).Methods("POST")
 	serMux.HandleFunc("/sales", dbServer.CORSMiddleware(dbQuery.CreateSales)).Methods("POST")
 	serMux.HandleFunc("/index", dbServer.HTMLCORSMiddleware(dbQuery.Index)).Methods("GET")
-	serMux.HandleFunc("/", dbServer.HTMLCORSMiddleware(dbQuery.Index)).Methods("GET")
+	serMux.HandleFunc("/", dbServer.HTMLCORSMiddleware(dbQuery.Checkout)).Methods("GET")
+	serMux.HandleFunc("/search", dbServer.CORSMiddleware(dbQuery.Search)).Methods("GET")
 
 	log.Println(server.ListenAndServe());
 }

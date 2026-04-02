@@ -1,10 +1,11 @@
 package handler
 
 import (
+	"fmt"
 	"html/template"
-	// "log"
 	"main/internal/database"
 	"net/http"
+	"log"
 )
 
 
@@ -17,10 +18,30 @@ func (db *Handler) Index(wr http.ResponseWriter, req *http.Request) {
 	lists := map[string][]database.GetFullProductDetailRow {
 		"products": list,
 	}
+	
 	tmpl.ExecuteTemplate(wr, "layout.html", lists)
 }
 
-
 func (handler *Handler) Checkout(wr http.ResponseWriter, req *http.Request) {
+	tmpl := template.Must(template.ParseFiles(
+		"template/layout.html", "template/checkout.html",
+	))
+	tmpl.ExecuteTemplate(wr, "layout.html", nil)
+}
 
+func (handler *Handler)Search(wr http.ResponseWriter, req *http.Request) {
+	query := req.URL.Query().Get("search")
+	res, err := handler.server.Queries.SearchProductForCheckout(req.Context(), query)
+	if err != nil {
+		log.Println(err)
+		ProcessingError(wr, http.StatusNotFound, fmt.Errorf("%s not found", query))
+		return
+	}
+
+	if len(res) == 0 {
+ 	   ProcessingError(wr, http.StatusNotFound, fmt.Errorf("%s not found", query))
+  	  return
+	}
+
+	respondWithJSON(wr, 200, res)
 }
