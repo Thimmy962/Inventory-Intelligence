@@ -121,6 +121,30 @@
             </div>
         </div>
         </div>
-        </div>
+    </div>
+<script>
+    function toggleMinimize() {
+        const modal = document.getElementById('addProductModal');
+        const content = document.getElementById('popupContent');
 
-        {{ end }}
+            if (!modal || !content) return;
+
+            if (modal.classList.contains('minimized')) {
+                modal.classList.remove('minimized');
+                content.style.display = 'block';
+            } else {
+                modal.classList.add('minimized');
+                content.style.display = 'none';
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('addProductModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                }
+            }
+        });
+</script>
+{{ end }}
