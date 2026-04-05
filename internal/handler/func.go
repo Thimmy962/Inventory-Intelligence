@@ -92,6 +92,7 @@ func validateSale(req *http.Request, items []Sales_Item, query app.Server) ([]da
 		// append to the list
 		products = append(products, product)
 	}
+	log.Println(total)
 	return products, total, nil
 }
 

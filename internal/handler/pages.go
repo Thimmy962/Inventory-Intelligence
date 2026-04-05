@@ -1,11 +1,12 @@
 package handler
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
+	"log"
 	"main/internal/database"
 	"net/http"
-	"log"
 )
 
 
@@ -44,4 +45,12 @@ func (handler *Handler)Search(wr http.ResponseWriter, req *http.Request) {
 	}
 
 	respondWithJSON(wr, 200, res)
+}
+
+
+func (handler *Handler)Req(wr http.ResponseWriter, req *http.Request) {
+	var buf bytes.Buffer
+	buf.ReadFrom(req.Body)
+	fmt.Println(buf.String())
+	respondWithJSON(wr, 201, nil)
 }

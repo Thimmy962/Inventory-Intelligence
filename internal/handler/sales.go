@@ -17,8 +17,9 @@ type Sales struct {
 type Sales_Item struct {
 	id int64
 	sales_id int64
-	Product_id string `json:"product_id"`
-	Quantity_sold int32 `json:"quantity"`
+	Product_id string `json:"pid"`
+	Quantity_sold int32 `json:"qty"`
+	Price float32 `json:"price"`
 } 
 
 type Adjustment struct {

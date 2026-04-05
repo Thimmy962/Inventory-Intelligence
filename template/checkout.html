@@ -82,7 +82,7 @@
                 disabled:shadow-none 
                 disabled:cursor-not-allowed 
                 disabled:opacity-70 
-                disabled:pointer-events-none"> Complete Sale
+                disabled:pointer-events-none" onclick="submitCart()"> Complete Sale
                 <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span></button>
         </div>
     </section>
@@ -196,7 +196,7 @@
 
             if (!existing) {
                 cart.push({
-                    id: item.ID,
+                    pid: item.ID,
                     name: item.ProductName,
                     price: item.Price,
                     qty: 1
@@ -274,6 +274,25 @@
         }
         renderCart()
     }
+    async function asyncSubmitCart(url, met, data = none) {
+        const res = await fetch(url, {
+            method: met,
+            headers: {"COntent-Type": "application/json"},
+            body: JSON.stringify(data)
+        })
+        if(!res.ok) {
+            throw new Error(`HTTP error! status ${res.status}`)
+        }
+        clear_all_items()
+        return await res.json()
+    }
 
+    function submitCart() {
+        url = "/sales"
+        met = "POST"
+        res = asyncSubmitCart(url, met, cart)
+        console.log(res)
+
+    }
 </script>
 {{ end }}
