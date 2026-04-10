@@ -35,3 +35,9 @@ SELECT
 FROM products p
 JOIN inventory i
 ON p.id = i.product_id;
+
+
+-- created a view(a virtualtable) for the above to reduce query time
+
+-- name: GetFullProductDetailView :many
+SELECT * FROM productdetail;

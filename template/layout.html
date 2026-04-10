@@ -147,8 +147,13 @@
             <div class="flex items-center gap-6">
                 <div class="relative focus-within:ring-2 focus-within:ring-emerald-500 rounded-lg bg-surface-container-low px-4 py-1.5 flex items-center gap-2 transition-all">
                     <span class="material-symbols-outlined text-emerald-700 text-lg">search</span>
-                    <input class="bg-transparent border-none focus:ring-0 text-sm w-64 placeholder:text-slate-400" placeholder="Search inventory..." type="text"/>
+                    <input id="searchProduct" class="bg-transparent border-none focus:ring-0 text-sm w-64 placeholder:text-slate-400" 
+                        placeholder="Search inventory..." type="text" oninput="queryProductOnLayout(this.value)"/>
+                    <div id="searchProductOverlay" class="absolute left-0 top-full mt-2 w-full bg-white border border-gray-200 
+                        rounded-xl shadow-lg hidden z-50 max-h-80 overflow-y-auto"
+                    ></div>
                 </div>
+                
                 <div class="flex items-center gap-4 text-emerald-700 dark:text-emerald-400">
                     <button class="hover:opacity-80 transition-opacity">
                         <span class="material-symbols-outlined">notifications</span>
@@ -178,10 +183,12 @@
             </div>
         <!-- Popup Content -->
         <div class="p-4 space-y-3 max-h-[500px] overflow-y-auto" id="popupContent">
-            <form class="space-y-4" onsubmit="event.preventDefault(); document.getElementById('addProductModal').classList.add('hidden');">
+            <!-- onsubmit="event.preventDefault(); document.getElementById('addProductModal').classList.add('hidden');" -->
+            <form class="space-y-4" id="newProductForm">
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-widest text-primary mb-1" for="product-name">Product Name</label>
-                    <input class="w-full px-3 py-2 rounded-lg border-primary/10 bg-primary/5 dark:bg-zinc-800 dark:border-zinc-700 focus:ring-1 focus:ring-primary outline-none text-sm" id="product-name" placeholder="Item name" required="" type="text"/>
+                    <input class="w-full px-3 py-2 rounded-lg border-primary/10 bg-primary/5 dark:bg-zinc-800 dark:border-zinc-700 focus:ring-1 focus:ring-primary outline-none text-sm" \
+                        id="product-name" placeholder="Item name" required="" type="text" name = "name"/>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                 </div>
@@ -195,20 +202,209 @@
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-primary mb-1" for="Reorder Level">Reorder Level</label>
                         <input class="w-full px-3 py-2 rounded-lg border-primary/10 bg-primary/5 dark:bg-zinc-800 dark:border-zinc-700 focus:ring-1 focus:ring-primary outline-none text-sm" 
-                            id="Reorder-level" placeholder="5" type="number" min="1"/>
+                            id="reorder-level" placeholder="5" type="number" min="1" name="reorder_level" required/>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-primary mb-1" for="selling-price">Price (₦)</label>
-                        <input class="w-full px-3 py-2 rounded-lg border-primary/10 bg-primary/5 dark:bg-zinc-800 dark:border-zinc-700 focus:ring-1 focus:ring-primary outline-none text-sm" 
-                            id="selling-price" placeholder="20.00" type="number" min="20.00"/>
+                        <input id="product-price" class="w-full px-3 py-2 rounded-lg border-primary/10 bg-primary/5 dark:bg-zinc-800 dark:border-zinc-700 focus:ring-1 focus:ring-primary outline-none text-sm" 
+                            id="selling-price" placeholder="20.00" type="number" min="20.00" name="price" required/>
                     </div>
                 </div>
             <div class="flex gap-2 pt-2">
-            <button class="flex-1 px-4 py-2 text-sm font-bold text-white bg-primary hover:bg-primary-container rounded-lg shadow-md transition-all font-display" type="submit">Create Product</button>
+            <button class="flex-1 px-4 py-2 text-sm font-bold text-white bg-primary hover:bg-primary-container \
+                rounded-lg shadow-md transition-all font-display" type="submit">Create Product</button>
             </div>
             </form>
         </div>
         </div>
     </div>
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 space-y-3"></div>
+    <script>
+        function toggleMinimize() {
+            const modal = document.getElementById('addProductModal');
+            const content = document.getElementById('popupContent');
+
+                if (!modal || !content) return;
+
+                if (modal.classList.contains('minimized')) {
+                    modal.classList.remove('minimized');
+                    content.style.display = 'block';
+                } else {
+                    modal.classList.add('minimized');
+                    content.style.display = 'none';
+                }
+            }
+
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('addProductModal');
+                    if (modal) {
+                        modal.classList.add('hidden');
+                        searchoverlay.classList.add("hidden")
+                    }
+                }
+            });
+        async function asyncSubmit(url, met, data = null) {
+            const res = await fetch(url, {
+                method: met,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json()
+            if (!res.ok) {
+                throw new Error(result.error || `HTTP error! status ${res.status}`);
+            }   
+            return result
+        }
+
+        const form = document.getElementById("newProductForm");
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+
+            const data = {
+                name: formData.get("name"),
+                price: Number(formData.get("price")), // optional but good
+                reorder_level: Number(formData.get("reorder_level"))
+            };
+            try {
+                const result = await asyncSubmit("/newproduct", "POST", data);
+                document.getElementById('addProductModal').classList.add('hidden');
+                showToast("Product added successfully", "success");
+            } catch (err) {
+                console.error("Error:", err);
+                showToast("Failed to add product", "error");
+            }
+        });
+
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toastContainer");
+
+            const toast = document.createElement("div");
+
+            const baseStyles =
+                "px-4 py-3 rounded-lg shadow-lg text-white flex items-center justify-between gap-3 min-w-[250px] max-w-[300px] transition-all duration-300 transform translate-y-[-20px] opacity-0";
+
+            const typeStyles = {
+                success: "bg-green-600",
+                error: "bg-red-600"
+            };
+
+            toast.className = `${baseStyles} ${typeStyles[type] || typeStyles.success}`;
+
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button class="text-white/80 hover:text-white">&times;</button>
+            `;
+
+            container.appendChild(toast);
+
+            // Trigger animation (enter)
+            requestAnimationFrame(() => {
+                toast.classList.remove("translate-y-[-20px]", "opacity-0");
+            });
+
+            // Close button
+            toast.querySelector("button").addEventListener("click", () => {
+                removeToast(toast);
+            });
+
+            // Auto remove
+            setTimeout(() => {
+                removeToast(toast);
+            }, 3000);
+        }
+
+        function removeToast(toast) {
+            toast.classList.add("opacity-0", "translate-y-[-20px]");
+            setTimeout(() => toast.remove(), 300);
+        }
+
+        let layouttypingTimer;
+        let layoutDoneTypingInterval = 1000;
+
+
+        const searchoverlay = document.getElementById("searchProductOverlay");
+
+        function clearSearchOverlay() {
+            searchoverlay.innerHTML = "";
+            searchoverlay.classList.add("hidden");
+        }
+        // search for product to select  for manipulation not add to cart 
+        function queryProductOnLayout(value) {
+            clearTimeout(layouttypingTimer);
+
+            if (value.length < 3) {
+                // if there is an overlay clear it
+                if(!searchoverlay.classList.contains("hidden")) {
+                    clearSearchOverlay();
+                }
+                return;
+            };
+
+            layouttypingTimer = setTimeout(() => {
+                executeLayoutSearch(value);
+            }, layoutDoneTypingInterval);
+        }
+
+        function executeLayoutSearch(value) {
+            if (value.length > 3) {
+                fetch(`/search?search=${value}`)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error(`HTTP error! status: ${res.status}`);
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        renderResults(data);
+                    })
+                    .catch(error => {
+                        console.error("There was an error with the request:", error.message);
+                        clearSearchOverlay();
+                    });
+            }
+        }
+
+        function renderResults(results) {
+            searchoverlay.innerHTML = "";
+
+            if (!results || results.length === 0) {
+                clearSearchOVerlay();
+                return;
+            }
+
+            results.forEach(item => {
+                const el = document.createElement("div");
+
+                el.className = `
+                    px-4 py-3 hover:bg-gray-100 cursor-pointer 
+                    flex justify-between items-center border-b last:border-none
+                `;
+
+                el.innerHTML = `
+                    <div>
+                        <p class="font-medium text-gray-800">${item.ProductName}</p>
+                        <p class="text-sm text-gray-500">Stock</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-green-700 font-semibold">₦${item.Price}</p>
+                        <p class="text-xs text-green-600">${item.QuantityOnHand}</p>
+                    </div>
+                `;
+
+                el.addEventListener("click", () => {
+                    input.value = ""
+                    // addToCart(item)
+                    console.log(item.ProductName)
+                    clearSearchOverlay();
+                });
+                    searchoverlay.appendChild(el);
+                });
+                searchoverlay.classList.remove("hidden");
+        }
+   </script>
 </body>
 </html>

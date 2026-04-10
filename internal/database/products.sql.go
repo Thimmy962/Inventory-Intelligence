@@ -103,6 +103,42 @@ func (q *Queries) GetFullProductDetail(ctx context.Context) ([]GetFullProductDet
 	return items, nil
 }
 
+const getFullProductDetailView = `-- name: GetFullProductDetailView :many
+
+SELECT id, product_name, quantity_on_hand, price, reorder_level, stock_status FROM productdetail
+`
+
+// created a view(a virtualtable) for the above to reduce query time
+func (q *Queries) GetFullProductDetailView(ctx context.Context) ([]Productdetail, error) {
+	rows, err := q.db.QueryContext(ctx, getFullProductDetailView)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Productdetail
+	for rows.Next() {
+		var i Productdetail
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProductName,
+			&i.QuantityOnHand,
+			&i.Price,
+			&i.ReorderLevel,
+			&i.StockStatus,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getProduct = `-- name: GetProduct :one
 SELECT id, product_name, created_at, updated_at, price, reorder_level FROM products WHERE id = $1
 `

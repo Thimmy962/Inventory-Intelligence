@@ -31,6 +31,15 @@ type Product struct {
 	ReorderLevel int32
 }
 
+type Productdetail struct {
+	ID             string
+	ProductName    string
+	QuantityOnHand int32
+	Price          float64
+	ReorderLevel   int32
+	StockStatus    int32
+}
+
 type Purchase struct {
 	ID            string
 	ProductID     string

@@ -11,12 +11,12 @@ import (
 
 
 func (db *Handler) Index(wr http.ResponseWriter, req *http.Request) {
-	list, _ := db.server.Queries.GetFullProductDetail(req.Context())
+	list, _ := db.server.Queries.GetFullProductDetailView(req.Context())
 	tmpl := template.Must(template.ParseFiles(
  	   "template/layout.html",
   	  "template/index.html",
 	))
-	lists := map[string][]database.GetFullProductDetailRow {
+	lists := map[string][]database.Productdetail {
 		"products": list,
 	}
 	

@@ -23,7 +23,6 @@ type SearchProductForCheckoutRow struct {
 	QuantityOnHand int32
 }
 
-// WHERE to_tsvector(p.product_name) @@ plainto_tsquery($1);
 func (q *Queries) SearchProductForCheckout(ctx context.Context, websearchToTsquery string) ([]SearchProductForCheckoutRow, error) {
 	rows, err := q.db.QueryContext(ctx, searchProductForCheckout, websearchToTsquery)
 	if err != nil {

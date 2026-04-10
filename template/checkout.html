@@ -10,7 +10,7 @@
                 <input id="searchInput" autofocus=""  oninput="queryServer(this.value)"
                 class="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-xl 
                 text-sm focus:ring-2 focus:ring-primary transition-all outline-none" placeholder="Search product name, SKU or brand..." type="text"/>
-                <div id="searchOverlay"class="absolute left-0 top-full mt-2 w-full bg-white border border-gray-200 
+               <div id="searchOverlay"class="absolute left-0 top-full mt-2 w-full bg-white border border-gray-200 
                     rounded-xl shadow-lg hidden z-50 max-h-80 overflow-y-auto"
                 ></div>
             </div>
@@ -110,6 +110,7 @@
     let typingTimer; 
     const doneTypingInterval = 1000; // 500ms pause
 
+    // search for product to select  for manipulation not add to cart 
     function queryServer(value) {
         clearTimeout(typingTimer);
 
@@ -192,7 +193,7 @@
     }
 
         function addToCart(item) {
-            const existing = cart.find(p => p.id === item.ID);
+            const existing = cart.find(p => p.pid === item.ID);
 
             if (!existing) {
                 cart.push({
@@ -274,25 +275,18 @@
         }
         renderCart()
     }
-    async function asyncSubmitCart(url, met, data = none) {
-        const res = await fetch(url, {
-            method: met,
-            headers: {"COntent-Type": "application/json"},
-            body: JSON.stringify(data)
-        })
-        if(!res.ok) {
-            throw new Error(`HTTP error! status ${res.status}`)
+
+    async function submitCart() {
+        try {
+            const result = await asyncSubmit("/sales", "POST", cart);
+            clear_all_items()
+            console.log(result)
+            showToast(result.status, "success");
+
+        } catch (err) {
+            console.log(err)    
+            showToast(err.message, "error");
         }
-        clear_all_items()
-        return await res.json()
-    }
-
-    function submitCart() {
-        url = "/sales"
-        met = "POST"
-        res = asyncSubmitCart(url, met, cart)
-        console.log(res)
-
     }
 </script>
 {{ end }}
