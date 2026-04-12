@@ -67,7 +67,7 @@ func (db *Handler) CreateProduct(writer http.ResponseWriter, req *http.Request) 
 		ProcessingError(writer, 400, err)
 		return
 	}
-	respondWithJSON(writer, 201, created_product)
+	respondWithJSON(writer, http.StatusCreated, created_product)
 }
 
 func (db *Handler) GetProducts(writer http.ResponseWriter, req *http.Request) {

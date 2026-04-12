@@ -60,3 +60,9 @@ FROM products p
 JOIN inventory i
 ON p.id = i.product_id
 WHERE p.id = $1;
+
+
+-- name: EditOneProduct :exec
+UPDATE products
+SET product_name = $2, price = $3, reorder_level = $4, updated_at = NOW()
+WHERE id = $1;

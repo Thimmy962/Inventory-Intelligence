@@ -2,181 +2,199 @@
 
 {{ define "content" }}
 <main class="pt-24 p-12 min-h-screen bg-surface">
-<div class="max-w-6xl mx-auto">
-    <!-- Header Section -->
+  <div class="max-w-6xl mx-auto">
+
+    <!-- Header -->
     <div class="flex justify-between items-end mb-12">
-        <div>
-            <h2 class="text-4xl font-extrabold text-on-surface tracking-tight leading-none mb-2">Edit Product</h2>
-            <p class="text-outline font-medium">Refine your catalog data for premium presentation.</p>
-        </div>
-        <div class="flex gap-4">
-            <!-- <button class="px-6 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold flex items-center gap-2 hover:bg-surface-container-high transition-colors">
-                <span class="material-symbols-outlined text-xl" data-icon="delete">delete</span>
-                                    Delete Product
-            </button> -->
-            <button class="px-8 py-3 bg-gradient-to-r from-primary to-primary-container text-white 
-                rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
-                  Save Changes
-            </button>
-        </div>
+      <div>
+        <h2 class="text-4xl font-extrabold text-on-surface tracking-tight leading-none mb-2">
+          Edit Product
+        </h2>
+        <p class="text-outline font-medium">
+          Refine your catalog data for premium presentation.
+        </p>
+      </div>
+
+      <div class="flex gap-4">
+        <button id="saveEditButton" class="px-8 py-3 bg-gradient-to-r from-primary to-primary-container text-white 
+          rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
+          Save Changes
+        </button>
+      </div>
     </div>
-    <!-- Asymmetric Bento Layout -->
-    <div class="gap-8">
-  <div class="col-span-12 lg:col-span-8 bg-surface-container-lowest rounded-xl p-10 shadow-sm border border-outline-variant/10">
+    <input type="hidden" id="product_id" name="id" value="{{.ID}}">
+    <!-- Card -->
+    <div class="bg-surface-container-lowest rounded-xl p-10 shadow-sm border border-outline-variant/10">
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
 
-      <!-- Product Name -->
-      <div class="md:col-span-2 space-y-2">
-        <label for="product_name" class="block text-xs font-bold uppercase tracking-widest text-outline">
-          Product Name
-        </label>
-        <input 
-          id="product_name"
-          name="product_name" 
-          type="text" 
-          value="{{.ProductName}}"
-          class="w-full text-2xl font-bold bg-surface-container-highest border-0 border-b-2 focus:border-primary px-0 py-2"
-        />
-      </div>
-
-      <!-- Pricing Section -->
-      <div class="md:col-span-2 pt-6">
-        <div class="flex items-center gap-4 mb-8">
-          <div class="h-px flex-1 bg-outline-variant/20"></div>
-          <span class="text-[10px] font-black uppercase tracking-[0.2em] text-outline/60">
-            Financial Metadata
-          </span>
-          <div class="h-px flex-1 bg-outline-variant/20"></div>
+        <!-- Product Name -->
+        <div class="md:col-span-2 space-y-2">
+          <label for="product_name" class="block text-xs font-bold uppercase tracking-widest text-outline">
+            Product Name
+          </label>
+          <input 
+            id="product_name"
+            name="product_name" 
+            type="text" 
+            value="{{.ProductName}}"
+            class="w-full pl-1 text-2xl font-bold bg-surface-container-highest border-0 border-b-2 focus:border-primary py-2"
+          />
         </div>
 
-        <div class="grid grid-cols-2 gap-12">
-          
-          <!-- Cost / Base Price -->
-          <div class="space-y-2">
-            <label class="block text-xs font-bold uppercase tracking-widest text-outline">
-              Price ($)
-            </label>
-            <input 
-              type="number"
-              name="price"
-              value="{{.Price}}"
-              class="w-full text-xl font-bold bg-surface-container-highest border-0 border-b-2 focus:border-primary px-0 py-2"
-            />
+        <!-- Financial Section -->
+        <div class="md:col-span-2 pt-6">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="h-px flex-1 bg-outline-variant/20"></div>
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-outline/60">
+              Financial Metadata
+            </span>
+            <div class="h-px flex-1 bg-outline-variant/20"></div>
           </div>
 
-          <!-- Selling Price -->
-          <div class="space-y-2">
-            <label class="block text-xs font-bold uppercase tracking-widest text-outline">
-              Selling Price ($)
-            </label>
-            <input 
-              type="number"
-              name="    price"
-              value="{{.Price}}"
-              class="w-full text-xl font-bold text-primary bg-surface-container-highest border-0 border-b-2 focus:border-primary px-0 py-2"
-            />
-          </div>
+          <div class="grid grid-cols-2 gap-12">
 
+            <!-- Price -->
+            <div class="space-y-2">
+              <label class="block text-xs font-bold uppercase tracking-widest text-outline">
+                Price ($)
+              </label>
+              <input 
+                type="number"
+                name="price"
+                value="{{.Price}}"
+                id="price"
+                min="100"
+                class="w-full pl-1 text-xl font-bold bg-surface-container-highest border-0 border-b-2 focus:border-primary py-2"
+              />
+            </div>
+
+            <!-- Reorder Level -->
+            <div class="space-y-2">
+              <label class="block text-xs font-bold uppercase tracking-widest text-outline">
+                Reorder Level
+              </label>
+              <input 
+                type="number"
+                name="reorder_level"
+                id="reorder_level"
+                value="{{.ReorderLevel}}"
+                min="5"
+                class="w-full pl-1 font-semibold bg-surface-container-highest border-0 border-b-2 focus:border-primary py-2"
+              />
+            </div>
+
+          </div>
         </div>
-      </div>
 
-    <!-- Stock Count (READ-ONLY + VISUAL STATUS) -->
-    <div class="md:col-span-2 space-y-3">
+        <!-- Stock (Read-only + Visual) -->
+        <div class="md:col-span-2 space-y-3">
 
-        <label class="block text-xs font-bold uppercase tracking-widest text-outline">
+          <label class="block text-xs font-bold uppercase tracking-widest text-outline">
             Current Stock
-        </label>
+          </label>
 
-        <!-- Value -->
-        <div class="flex items-center justify-between bg-surface-container-highest px-4 py-3 rounded-lg">
+          <!-- Value -->
+          <div class="flex items-center justify-between bg-surface-container-highest px-4 py-3 rounded-lg">
             <span class="text-lg font-bold text-on-surface">
-            {{.QuantityOnHand}}
+              {{.QuantityOnHand}}
             </span>
             <span class="text-xs text-outline font-medium">
-            Units available
+              Units available
             </span>
-        </div>
+          </div>
 
-        <!-- Visual Stock Status -->
-        <div class="flex items-center justify-between px-1">
+          <!-- Stock Health -->
+          <div class="flex items-center justify-between px-1">
 
             <span class="text-[10px] font-semibold text-outline uppercase">
-            Stock Health
+              Stock Health
             </span>
 
             <div class="flex items-center gap-3">
-            
-            <div class="w-28 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
-                {{if eq .StockStatus 1}}
-                <div class="w-4/5 h-full bg-primary"></div>
-                {{else if eq .StockStatus 0}}
-                <div class="w-3/5 h-full bg-secondary"></div>
-                {{else if eq .StockStatus -1}}
-                <div class="w-2/5 h-full bg-tertiary"></div>
-                {{else}}
-                <div class="w-1/5 h-full bg-error"></div>
-                {{end}}
-            </div>
 
-            <span class="text-[10px] font-black 
+              <div class="w-28 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+                {{if eq .StockStatus 1}}
+                  <div class="w-4/5 h-full bg-primary"></div>
+                {{else if eq .StockStatus 0}}
+                  <div class="w-3/5 h-full bg-secondary"></div>
+                {{else if eq .StockStatus -1}}
+                  <div class="w-2/5 h-full bg-tertiary"></div>
+                {{else}}
+                  <div class="w-1/5 h-full bg-error"></div>
+                {{end}}
+              </div>
+
+              <span class="text-[10px] font-black 
                 {{if eq .StockStatus 1}}text-primary
                 {{else if eq .StockStatus 0}}text-secondary
                 {{else if eq .StockStatus -1}}text-tertiary
                 {{else}}text-error{{end}}">
                 {{.QuantityOnHand}} IN STOCK
-            </span>
+              </span>
 
             </div>
+          </div>
         </div>
 
-    </div>
-
-
-      <!-- Reorder Level -->
-      <div class="space-y-2">
-        <label class="block text-xs font-bold uppercase tracking-widest text-outline">
-          Reorder Level
-        </label>
-        <input 
-          type="number"
-          name="reorder_level"
-          value="{{.ReorderLevel}}"
-          class="w-full font-semibold bg-surface-container-highest border-0 border-b-2 focus:border-primary px-0 py-2"
-        />
       </div>
 
+      <!-- Footer -->
+      <div class="mt-16 pt-8 border-t border-outline-variant/10 flex items-center justify-between">
+        <div class="flex items-center gap-2 text-outline">
+          <span class="material-symbols-outlined text-sm">info</span>
+          <span class="text-xs font-medium italic">
+            {{if .UpdatedAt.Valid}}
+              Last updated {{.UpdatedAt.Time.Format "02 Jan 2006, 15:04"}}
+            {{else}}
+              Never updated
+            {{end}}
+          </span>
+        </div>
+
+        <a href="/index"
+           class="text-on-surface font-bold text-sm px-4 py-2 hover:bg-surface-container-low rounded-lg transition-colors">
+          Discard Changes
+        </a>
+      </div>
+        <div class="flex items-center gap-4 mb-8">
+            <div class="h-px flex-1 bg-outline-variant/20"></div>
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-outline/60">
+              Analytics Metadata
+            </span>
+            <div class="h-px flex-1 bg-outline-variant/20"></div>
+        </div>
     </div>
 
-    <!-- Footer -->
-    <div class="mt-16 pt-8 border-t border-outline-variant/10 flex items-center justify-between">
-      <div class="flex items-center gap-2 text-outline">
-        <span class="material-symbols-outlined text-sm">info</span>
-          <span class="text-xs font-medium italic"> 
-            {{if .UpdatedAt.Valid}} 
-                Last updated {{.UpdatedAt.Time.Format "02 Jan 2006, 15:04"}} 
-            {{else}} 
-                Never updated 
-            {{end}} </span>
-      </div>
-
-      <a href="/index"
-         class="text-on-surface font-bold text-sm px-4 py-2 hover:bg-surface-container-low rounded-lg transition-colors">
-        Discard Changes
-      </a>
+    <!-- Separator -->
+    <div class="mt-16 flex flex-col items-center">
+      <div class="w-full h-px bg-gradient-to-r from-transparent via-outline-variant/30 to-transparent mb-8"></div>
+      <p class="text-outline text-xs text-center max-w-lg font-medium opacity-60">
+        Changes made to this product will be reflected instantly across all retail channels including online storefronts and POS terminals.
+      </p>
     </div>
 
   </div>
-</div>
-
-<!-- Separator -->
-<div class="mt-16 flex flex-col items-center">
-  <div class="w-full h-px bg-gradient-to-r from-transparent via-outline-variant/30 to-transparent mb-8"></div>
-  <p class="text-outline text-xs text-center max-w-lg font-medium opacity-60">
-    Changes made to this product will be reflected instantly across all retail channels including online storefronts and POS terminals.
-  </p>
-</div>
-```
-    </div>
 </main>
+<script>
+
+    let saveBtn = document.getElementById("saveEditButton")
+    saveBtn.addEventListener("click", async() => {
+        data = {
+            name: document.getElementById("product_name").value,
+            reorder_level: Number(document.getElementById("reorder_level").value),
+            price:  Number(document.getElementById("price").value),
+            id: document.getElementById("product_id").value
+        }
+        console.log(data)
+        try {
+            const result = await asyncSubmit(`/edit/${data.id}`, "PUT", data);
+            showToast("Edit successful", "success");
+            window.location.reload()
+        } catch (err) {
+            console.error("Error:", err);
+            showToast("Failed to add product", "error");
+        }
+    })
+</script>
 {{ end }}

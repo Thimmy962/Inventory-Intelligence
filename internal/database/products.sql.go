@@ -47,6 +47,29 @@ func (q *Queries) DeleteProduct(ctx context.Context, id string) error {
 	return err
 }
 
+const editOneProduct = `-- name: EditOneProduct :exec
+UPDATE products
+SET product_name = $2, price = $3, reorder_level = $4, updated_at = NOW()
+WHERE id = $1
+`
+
+type EditOneProductParams struct {
+	ID           string
+	ProductName  string
+	Price        float64
+	ReorderLevel int32
+}
+
+func (q *Queries) EditOneProduct(ctx context.Context, arg EditOneProductParams) error {
+	_, err := q.db.ExecContext(ctx, editOneProduct,
+		arg.ID,
+		arg.ProductName,
+		arg.Price,
+		arg.ReorderLevel,
+	)
+	return err
+}
+
 const getFullProductDetail = `-- name: GetFullProductDetail :many
 SELECT 
   p.id,

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -51,6 +52,26 @@ func (handler *Handler)Search(wr http.ResponseWriter, req *http.Request) {
 func (handler *Handler)EditProduct(wr http.ResponseWriter, req *http.Request) {
     vars := mux.Vars(req)
     id := vars["id"]
+	if req.Method == "PUT" {
+		var product Product
+		err := json.NewDecoder(req.Body).Decode(&product)
+		if err != nil {
+			log.Println(err)
+			ProcessingError(wr, 400, err)
+			return
+		}
+		err = handler.server.Queries.EditOneProduct(req.Context(), database.EditOneProductParams{
+			ID: product.ID, ProductName: product.ProductName, Price: product.Price, ReorderLevel: product.ReorderLevel, 
+		})
+		if err != nil {
+			log.Println(err)
+			ProcessingError(wr, 400, err)
+			return
+		}
+		respondWithJSON(wr, http.StatusAccepted, nil)
+		return
+	}
+
     product, err := handler.server.Queries.GetOneFullProductDetail(req.Context(), id)
     if err != nil {
         tmpl := template.Must(template.ParseFiles(
