@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createProduct = `-- name: CreateProduct :one
@@ -104,11 +105,9 @@ func (q *Queries) GetFullProductDetail(ctx context.Context) ([]GetFullProductDet
 }
 
 const getFullProductDetailView = `-- name: GetFullProductDetailView :many
-
 SELECT id, product_name, quantity_on_hand, price, reorder_level, stock_status FROM productdetail
 `
 
-// created a view(a virtualtable) for the above to reduce query time
 func (q *Queries) GetFullProductDetailView(ctx context.Context) ([]Productdetail, error) {
 	rows, err := q.db.QueryContext(ctx, getFullProductDetailView)
 	if err != nil {
@@ -137,6 +136,51 @@ func (q *Queries) GetFullProductDetailView(ctx context.Context) ([]Productdetail
 		return nil, err
 	}
 	return items, nil
+}
+
+const getOneFullProductDetail = `-- name: GetOneFullProductDetail :one
+SELECT 
+  p.id,
+  p.product_name,
+  i.quantity_on_hand,
+  p.price,
+  p.reorder_level,
+  p.updated_at,
+  CASE 
+    WHEN i.quantity_on_hand = 0 THEN -2
+    WHEN i.quantity_on_hand <= p.reorder_level THEN -1
+    WHEN i.quantity_on_hand <= p.reorder_level * 1.5 THEN 0
+    ELSE 1
+  END AS stock_status
+FROM products p
+JOIN inventory i
+ON p.id = i.product_id
+WHERE p.id = $1
+`
+
+type GetOneFullProductDetailRow struct {
+	ID             string
+	ProductName    string
+	QuantityOnHand int32
+	Price          float64
+	ReorderLevel   int32
+	UpdatedAt      sql.NullTime
+	StockStatus    int32
+}
+
+func (q *Queries) GetOneFullProductDetail(ctx context.Context, id string) (GetOneFullProductDetailRow, error) {
+	row := q.db.QueryRowContext(ctx, getOneFullProductDetail, id)
+	var i GetOneFullProductDetailRow
+	err := row.Scan(
+		&i.ID,
+		&i.ProductName,
+		&i.QuantityOnHand,
+		&i.Price,
+		&i.ReorderLevel,
+		&i.UpdatedAt,
+		&i.StockStatus,
+	)
+	return i, err
 }
 
 const getProduct = `-- name: GetProduct :one

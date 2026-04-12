@@ -70,7 +70,7 @@ func main() {
 	serMux.HandleFunc("/index", dbServer.HTMLCORSMiddleware(dbQuery.Index)).Methods("GET")
 	serMux.HandleFunc("/", dbServer.HTMLCORSMiddleware(dbQuery.Checkout)).Methods("GET")
 	serMux.HandleFunc("/search", dbServer.CORSMiddleware(dbQuery.Search)).Methods("GET")
-	serMux.HandleFunc("/req", dbServer.CORSMiddleware(dbQuery.Req)).Methods("POST")
+	serMux.HandleFunc("/edit/{id}", dbServer.HTMLCORSMiddleware(dbQuery.EditProduct)).Methods("GET")
 
 	log.Println(server.ListenAndServe());
 }

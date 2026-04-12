@@ -1,12 +1,13 @@
 package handler
 
 import (
-	"bytes"
 	"fmt"
 	"html/template"
 	"log"
 	"main/internal/database"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 
@@ -47,10 +48,19 @@ func (handler *Handler)Search(wr http.ResponseWriter, req *http.Request) {
 	respondWithJSON(wr, 200, res)
 }
 
-
-func (handler *Handler)Req(wr http.ResponseWriter, req *http.Request) {
-	var buf bytes.Buffer
-	buf.ReadFrom(req.Body)
-	fmt.Println(buf.String())
-	respondWithJSON(wr, 201, nil)
+func (handler *Handler)EditProduct(wr http.ResponseWriter, req *http.Request) {
+    vars := mux.Vars(req)
+    id := vars["id"]
+    product, err := handler.server.Queries.GetOneFullProductDetail(req.Context(), id)
+    if err != nil {
+        tmpl := template.Must(template.ParseFiles(
+            "template/layout.html", "template/error.html",
+        ))
+        tmpl.ExecuteTemplate(wr, "layout.html", nil)
+    } else {
+        tmpl := template.Must(template.ParseFiles(
+            "template/layout.html", "template/edit.html",
+        ))
+        tmpl.ExecuteTemplate(wr, "layout.html", product)
+    }
 }

@@ -385,19 +385,20 @@
                 `;
 
                 el.innerHTML = `
-                    <div>
-                        <p class="font-medium text-gray-800">${item.ProductName}</p>
-                        <p class="text-sm text-gray-500">Stock</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-green-700 font-semibold">₦${item.Price}</p>
-                        <p class="text-xs text-green-600">${item.QuantityOnHand}</p>
-                    </div>
+                    <a href="/edit/${item.ID}" class="flex justify-between items-center px-4 py-3 w-full h-full">
+                        <div>
+                            <p class="font-medium text-gray-800">${item.ProductName}</p>
+                            <p class="text-sm text-gray-500">Stock</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-green-700 font-semibold">₦${item.Price}</p>
+                            <p class="text-xs text-green-600">${item.QuantityOnHand}</p>
+                        </div>
+                    </a>
                 `;
 
                 el.addEventListener("click", () => {
                     input.value = ""
-                    // addToCart(item)
                     console.log(item.ProductName)
                     clearSearchOverlay();
                 });

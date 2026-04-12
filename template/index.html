@@ -71,6 +71,7 @@
             <div class="grid grid-cols-1 gap-1">
                 <!-- Product Row 1 -->
                 {{range .products}}
+                    <a href="/edit/{{.ID}}">
                     <div class="grid grid-cols-12 items-center px-6 py-4 bg-white border-b border-outline-variant/10 hover:bg-primary/5 transition-all group cursor-pointer">
                         <div class="col-span-5">
                             <h5 class="text-base font-bold text-on-surface group-hover:text-primary transition-colors">{{.ProductName}}</h5>
@@ -117,6 +118,7 @@
                         <p class="text-base font-black text-on-surface">₦ {{.Price}}</p>
                         </div>
                     </div>
+                    </a>
                 {{end}}
             </div>
         </div>
