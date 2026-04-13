@@ -9,6 +9,30 @@ import (
 	"context"
 )
 
+const createAdjustments = `-- name: CreateAdjustments :one
+INSERT INTO adjustments (product_id, quantity_changed, reason, adjustment_date)
+VALUES ($1, $2, $3, NOW())
+Returning product_id, quantity_changed
+`
+
+type CreateAdjustmentsParams struct {
+	ProductID       string
+	QuantityChanged int32
+	Reason          string
+}
+
+type CreateAdjustmentsRow struct {
+	ProductID       string
+	QuantityChanged int32
+}
+
+func (q *Queries) CreateAdjustments(ctx context.Context, arg CreateAdjustmentsParams) (CreateAdjustmentsRow, error) {
+	row := q.db.QueryRowContext(ctx, createAdjustments, arg.ProductID, arg.QuantityChanged, arg.Reason)
+	var i CreateAdjustmentsRow
+	err := row.Scan(&i.ProductID, &i.QuantityChanged)
+	return i, err
+}
+
 const createPurchase = `-- name: CreatePurchase :one
 INSERT INTO purchases (id, product_id, quantity_added, purchase_date)
 VALUES (gen_random_uuid(), $1, $2, NOW())

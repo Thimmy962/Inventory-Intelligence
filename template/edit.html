@@ -196,7 +196,57 @@
         </div>
       </div>
 
-      
+      <!-- Stock Adjustment -->
+      <div class="mt-12">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="h-px flex-1 bg-outline-variant/20"></div>
+          <span class="text-[10px] font-black uppercase tracking-[0.2em] text-outline/60">
+            Stock Adjustment
+          </span>
+          <div class="h-px flex-1 bg-outline-variant/20"></div>
+        </div>
+
+        <div class="bg-surface-container-highest rounded-xl p-6 grid grid-cols-3 gap-6">
+
+          <div class="space-y-2">
+            <label class="text-xs font-bold uppercase text-outline">
+              Quantity Removed
+            </label>
+            <input
+              type="number"
+              id="stockOutQuantity"
+              min="1"
+              placeholder="0"
+              class="w-full pl-1 text-lg font-bold bg-transparent border-b-2 rounded-b-md focus:border-primary py-2"
+            />
+          </div>
+
+          <div class="space-y-2 col-span-2">
+            <label class="text-xs font-bold uppercase text-outline">
+              Reason
+            </label>
+            <select
+              id="stockOutReason"
+              class="w-full pl-1 text-lg bg-transparent border-b-2 rounded-b-md focus:border-primary py-2">
+              <option value="">Select reason</option>
+              <option value="DAMAGED">Damaged</option>
+              <option value="EXPIRED">Expired</option>
+              <option value="THEFT">Theft / Loss</option>
+              <option value="MANUAL">Manual Correction</option>
+            </select>
+          </div>
+
+          <div class="col-span-3 flex justify-end">
+            <button id="stockOutBtn"
+              class="px-6 py-3 bg-error text-white rounded-xl font-bold 
+              hover:scale-[1.02] active:scale-95 transition-all">
+              Remove Stock
+            </button>
+          </div>
+
+        </div>
+      </div>
+
       <!-- Analytics -->
       <div class="mt-20 flex items-center gap-4 mb-8">
         <div class="h-px flex-1 bg-outline-variant/20"></div>
@@ -258,8 +308,35 @@
       } catch (err) {
           console.error("Error: ", err)
           showToast(`Failed to add product: ${err.message}`, "error");
-
       }
+    })
+
+    let stockOutBtn = document.getElementById("stockOutBtn");
+    stockOutBtn.addEventListener("click", async()=>{
+      let stockOutQuantity = document.getElementById("stockOutQuantity").value;
+      let stockOutReason = document.getElementById("stockOutReason").value;
+      let id = document.getElementById("product_id").value;
+
+      if(!stockOutQuantity) {
+        showToast("Quantity removed can't be empty", "error")
+        return
+      }
+      if(!stockOutReason) {
+        showToast("Reason behind removed stock can't be empty", "error")
+        return
+      }
+
+      try {
+        const res = await asyncSubmit("/adjustment", "POST", {
+          quantity: Number(stockOutQuantity), reason: stockOutReason, productID: id
+        })
+        showToast("Removal Successful", "success")
+        window.location.reload()
+      } catch (err) {
+          console.error("Error: ", err)
+          showToast(`Failed to add product: ${err.message}`, "error");
+      }
+
     })
 </script>
 {{ end }}

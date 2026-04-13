@@ -6,3 +6,8 @@ Returning id;
 -- name: DeletePurchase :exec
 DELETE FROM purchases WHERE id = $1;
 
+
+-- name: CreateAdjustments :one
+INSERT INTO adjustments (product_id, quantity_changed, reason, adjustment_date)
+VALUES ($1, $2, $3, NOW())
+Returning product_id, quantity_changed;

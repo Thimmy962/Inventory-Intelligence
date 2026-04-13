@@ -40,9 +40,9 @@ func respondWithJSON(w http.ResponseWriter, code int, payload any) {
     w.Write(buf.Bytes())
 }
 
-func (db *Handler)NewProduct(purchase *Purchase, w http.ResponseWriter, req *http.Request) {
+func (db *Handler)NewProduct(purchase *PurAdj, w http.ResponseWriter, req *http.Request) {
 	id := purchase.ProductID
-	quantityAdded := purchase.QuantityAdded
+	quantityAdded := purchase.Quantity
 	data, err := db.server.Queries.GetInventory(req.Context(), id)
 	if err != nil {
 		newErr := db.server.Queries.NewInventory(req.Context(), database.NewInventoryParams{ProductID: id, QuantityOnHand: quantityAdded})

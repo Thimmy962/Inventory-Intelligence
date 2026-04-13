@@ -47,10 +47,12 @@ type NewProduct struct {
 	// todo...
 }
 
-type Purchase struct {
+// Used for receiving data to created new purchase or new adjustment
+type PurAdj struct {
 	ID            string `json:"id"`
 	ProductID     string `json:"productId"`
-	QuantityAdded int32  `json:"quantity"`
+	Quantity int32  `json:"quantity"`
+	Reason string `json:"Reason"`
 }
 
 func (db *Handler) CreateProduct(writer http.ResponseWriter, req *http.Request) {
@@ -141,7 +143,7 @@ func (db *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (db *Handler) NewBulkPurchase(w http.ResponseWriter, r *http.Request) {
-	var purchases []Purchase
+	var purchases []PurAdj
 	err := json.NewDecoder(r.Body).Decode(&purchases)
 	if err != nil {
 		log.Println(err)
@@ -152,7 +154,7 @@ func (db *Handler) NewBulkPurchase(w http.ResponseWriter, r *http.Request) {
 	for _, purchase := range purchases {
 		_, err = db.server.Queries.CreatePurchase(r.Context(),
 			database.CreatePurchaseParams{ProductID: purchase.ProductID,
-				QuantityAdded: purchase.QuantityAdded})
+				QuantityAdded: purchase.Quantity})
 		if err != nil {
 			log.Println(err)
 			ProcessingError(w, http.StatusBadRequest, err)
@@ -174,7 +176,7 @@ func (db *Handler) NewBulkPurchase(w http.ResponseWriter, r *http.Request) {
 // creates a new purchase.
 // If the new purchase is in inventory update to the quantity available else create a new inventory
 func (db *Handler) NewPurchase(w http.ResponseWriter, r *http.Request) {
-	var purchase Purchase
+	var purchase PurAdj
 	err := json.NewDecoder(r.Body).Decode(&purchase)
 	if err != nil {
 		log.Println(err)
@@ -185,7 +187,7 @@ func (db *Handler) NewPurchase(w http.ResponseWriter, r *http.Request) {
 	//creates new purchase
 	pur, err := db.server.Queries.CreatePurchase(r.Context(),
 		database.CreatePurchaseParams{ProductID: purchase.ProductID,
-			QuantityAdded: purchase.QuantityAdded})
+			QuantityAdded: purchase.Quantity})
 
 	// if there is an error in creating new purchase return
 	if err != nil {
@@ -208,9 +210,9 @@ func (db *Handler) NewPurchase(w http.ResponseWriter, r *http.Request) {
 
 
 // creates new or update available inventory 
-func (db *Handler) Inventory(purchase *Purchase, w http.ResponseWriter, req *http.Request) error {
+func (db *Handler) Inventory(purchase *PurAdj, w http.ResponseWriter, req *http.Request) error {
 	id := purchase.ProductID
-	quantityAdded := purchase.QuantityAdded
+	quantityAdded := purchase.Quantity
 
 	data, err := db.server.Queries.GetInventory(req.Context(), id)
 
@@ -232,6 +234,45 @@ func (db *Handler) Inventory(purchase *Purchase, w http.ResponseWriter, req *htt
 }
 
 
-// func(handler *Handler) Adjustment(wr http.ResponseWriter, req *http.Request) {
-// 	var purchase Purchase
-// }
+func(handler *Handler) Adjustment(wr http.ResponseWriter, req *http.Request) {
+	var adjustment PurAdj
+	err := json.NewDecoder(req.Body).Decode(&adjustment)
+	if err != nil {
+		log.Println(err)
+		ProcessingError(wr, http.StatusBadRequest, err)
+		return
+	}
+
+	adj, err := handler.server.Queries.CreateAdjustments(req.Context(), database.CreateAdjustmentsParams{
+		ProductID: adjustment.ProductID, QuantityChanged: adjustment.Quantity, Reason: adjustment.Reason,
+	})
+	
+	if err != nil {
+		log.Println(err)
+		ProcessingError(wr, http.StatusBadRequest, err)
+		return
+	}
+
+	inventory, err := handler.server.Queries.GetInventory(req.Context(), adj.ProductID)
+	if err != nil {
+		log.Println(err)
+		ProcessingError(wr, http.StatusBadRequest, err)
+		return
+	}
+	newInventoryValue := inventory.QuantityOnHand - adj.QuantityChanged
+
+	if newInventoryValue < 0 {
+		newErr := fmt.Errorf("Inventory value can't be less than 0")
+		log.Println(newErr)
+		ProcessingError(wr, http.StatusBadRequest, newErr)
+		return
+	}
+
+	handler.server.Queries.UpdatedInventory(req.Context(), database.UpdatedInventoryParams{
+		ProductID: inventory.ProductID, QuantityOnHand: newInventoryValue,
+	})
+
+		respondWithJSON(wr, http.StatusCreated, map[string]string{
+		"status": "Adjustment Successful",
+	})
+}
