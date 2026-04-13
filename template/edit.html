@@ -16,13 +16,16 @@
       </div>
 
       <div class="flex gap-4">
-        <button id="saveEditButton" class="px-8 py-3 bg-gradient-to-r from-primary to-primary-container text-white 
+        <button id="saveEditButton"
+          class="px-8 py-3 bg-gradient-to-r from-primary to-primary-container text-white 
           rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
           Save Changes
         </button>
       </div>
     </div>
+
     <input type="hidden" id="product_id" name="id" value="{{.ID}}">
+
     <!-- Card -->
     <div class="bg-surface-container-lowest rounded-xl p-10 shadow-sm border border-outline-variant/10">
 
@@ -30,15 +33,16 @@
 
         <!-- Product Name -->
         <div class="md:col-span-2 space-y-2">
-          <label for="product_name" class="block text-xs font-bold uppercase tracking-widest text-outline">
+          <label for="product_name"
+            class="block text-xs font-bold uppercase tracking-widest text-outline">
             Product Name
           </label>
-          <input 
+          <input
             id="product_name"
-            name="product_name" 
-            type="text" 
+            name="product_name"
+            type="text"
             value="{{.ProductName}}"
-            class="w-full pl-1 text-2xl font-bold bg-surface-container-highest border-0 border-b-2 focus:border-primary py-2"
+            class="w-full pl-1 text-2xl font-bold bg-surface-container-highest border-0 border-b-2 rounded-b-md focus:border-primary py-2"
           />
         </div>
 
@@ -57,15 +61,15 @@
             <!-- Price -->
             <div class="space-y-2">
               <label class="block text-xs font-bold uppercase tracking-widest text-outline">
-                Price ($)
+                Price (₦)
               </label>
-              <input 
+              <input
                 type="number"
                 name="price"
                 value="{{.Price}}"
                 id="price"
                 min="100"
-                class="w-full pl-1 text-xl font-bold bg-surface-container-highest border-0 border-b-2 focus:border-primary py-2"
+                class="w-full pl-1 text-xl font-bold bg-surface-container-highest border-0 border-b-2 rounded-b-md focus:border-primary py-2"
               />
             </div>
 
@@ -74,27 +78,26 @@
               <label class="block text-xs font-bold uppercase tracking-widest text-outline">
                 Reorder Level
               </label>
-              <input 
+              <input
                 type="number"
                 name="reorder_level"
                 id="reorder_level"
                 value="{{.ReorderLevel}}"
                 min="5"
-                class="w-full pl-1 font-semibold bg-surface-container-highest border-0 border-b-2 focus:border-primary py-2"
+                class="w-full pl-1 font-semibold bg-surface-container-highest border-0 border-b-2 rounded-b-md focus:border-primary py-2"
               />
             </div>
 
           </div>
         </div>
 
-        <!-- Stock (Read-only + Visual) -->
+        <!-- Stock -->
         <div class="md:col-span-2 space-y-3">
 
           <label class="block text-xs font-bold uppercase tracking-widest text-outline">
             Current Stock
           </label>
 
-          <!-- Value -->
           <div class="flex items-center justify-between bg-surface-container-highest px-4 py-3 rounded-lg">
             <span class="text-lg font-bold text-on-surface">
               {{.QuantityOnHand}}
@@ -104,15 +107,12 @@
             </span>
           </div>
 
-          <!-- Stock Health -->
           <div class="flex items-center justify-between px-1">
-
             <span class="text-[10px] font-semibold text-outline uppercase">
               Stock Health
             </span>
 
             <div class="flex items-center gap-3">
-
               <div class="w-28 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
                 {{if eq .StockStatus 1}}
                   <div class="w-4/5 h-full bg-primary"></div>
@@ -125,14 +125,13 @@
                 {{end}}
               </div>
 
-              <span class="text-[10px] font-black 
+              <span class="text-[10px] font-black
                 {{if eq .StockStatus 1}}text-primary
                 {{else if eq .StockStatus 0}}text-secondary
                 {{else if eq .StockStatus -1}}text-tertiary
                 {{else}}text-error{{end}}">
                 {{.QuantityOnHand}} IN STOCK
               </span>
-
             </div>
           </div>
         </div>
@@ -143,27 +142,70 @@
       <div class="mt-16 pt-8 border-t border-outline-variant/10 flex items-center justify-between">
         <div class="flex items-center gap-2 text-outline">
           <span class="material-symbols-outlined text-sm">info</span>
-          <span class="text-xs font-medium italic">
-            {{if .UpdatedAt.Valid}}
-              Last updated {{.UpdatedAt.Time.Format "02 Jan 2006, 15:04"}}
-            {{else}}
-              Never updated
-            {{end}}
-          </span>
+          {{if .UpdatedAt.Valid}}
+            Product last updated {{.UpdatedAt.Time.Format "02 Jan 2006, 15:04"}}
+          {{else}}
+            Never updated
+          {{end}}
+          <span class="material-symbols-outlined text-sm">info</span>
+          {{if .LastUpdated.Valid}}
+            Inventory last updated {{.LastUpdated.Time.Format "02 Jan 2006, 15:04"}}
+          {{else}}
+            Never updated
+          {{end}}
         </div>
 
         <a href="/index"
-           class="text-on-surface font-bold text-sm px-4 py-2 hover:bg-surface-container-low rounded-lg transition-colors">
+          class="text-on-surface font-bold text-sm px-4 py-2 hover:bg-surface-container-low rounded-lg transition-colors">
           Discard Changes
         </a>
       </div>
-        <div class="flex items-center gap-4 mb-8">
-            <div class="h-px flex-1 bg-outline-variant/20"></div>
-            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-outline/60">
-              Analytics Metadata
-            </span>
-            <div class="h-px flex-1 bg-outline-variant/20"></div>
+
+      <!-- Stock In -->
+      <div class="mt-12">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="h-px flex-1 bg-outline-variant/20"></div>
+          <span class="text-[10px] font-black uppercase tracking-[0.2em] text-outline/60">
+            Stock In
+          </span>
+          <div class="h-px flex-1 bg-outline-variant/20"></div>
         </div>
+
+        <div class="bg-surface-container-highest rounded-xl p-6 grid grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="text-xs font-bold uppercase text-outline">
+              Add Quantity
+            </label>
+            <input
+              type="number"
+              id="stockInQuantity"
+              min="1"
+              placeholder="0"
+              required
+              class="w-full pl-1 text-lg font-bold bg-transparent border-b-2 rounded-b-md focus:border-primary py-2"
+            />
+          </div>
+
+          <div class="flex items-end">
+            <button id="stockInBtn"
+              class="w-full px-6 py-3 bg-primary text-white rounded-xl font-bold 
+              hover:scale-[1.02] active:scale-95 transition-all">
+              Add Stock
+            </button>
+          </div>
+        </div>
+      </div>
+
+      
+      <!-- Analytics -->
+      <div class="mt-20 flex items-center gap-4 mb-8">
+        <div class="h-px flex-1 bg-outline-variant/20"></div>
+        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-outline/60">
+          Analytics Metadata
+        </span>
+        <div class="h-px flex-1 bg-outline-variant/20"></div>
+      </div>
+
     </div>
 
     <!-- Separator -->
@@ -193,8 +235,31 @@
             window.location.reload()
         } catch (err) {
             console.error("Error:", err);
-            showToast("Failed to add product", "error");
+            showToast(`Failed to add product: ${err.message}`, "error");
         }
+    })
+
+    let stockInBtn = document.getElementById("stockInBtn");
+    stockInBtn.addEventListener('click', async () => {
+      let stockInQuantity = document.getElementById("stockInQuantity").value;
+      let productID = document.getElementById("product_id").value
+      if(!stockInQuantity) {
+        showToast("Quantity can't be empty", "error")
+        return
+      }
+      data = {
+        quantity: Number(stockInQuantity),
+        productID: productID
+      }
+      try {
+        const result = await asyncSubmit('/purchase', "POST", data)
+        showToast("Quantity Added Successfully", "success")
+        window.location.reload()
+      } catch (err) {
+          console.error("Error: ", err)
+          showToast(`Failed to add product: ${err.message}`, "error");
+
+      }
     })
 </script>
 {{ end }}

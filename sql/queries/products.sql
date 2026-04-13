@@ -50,6 +50,7 @@ SELECT
   p.price,
   p.reorder_level,
   p.updated_at,
+  i.last_updated,
   CASE 
     WHEN i.quantity_on_hand = 0 THEN -2
     WHEN i.quantity_on_hand <= p.reorder_level THEN -1

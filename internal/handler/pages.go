@@ -7,7 +7,6 @@ import (
 	"log"
 	"main/internal/database"
 	"net/http"
-
 	"github.com/gorilla/mux"
 )
 
@@ -82,6 +81,7 @@ func (handler *Handler)EditProduct(wr http.ResponseWriter, req *http.Request) {
         tmpl := template.Must(template.ParseFiles(
             "template/layout.html", "template/edit.html",
         ))
+		// database.GetOneFullProductDetailRow
         tmpl.ExecuteTemplate(wr, "layout.html", product)
     }
 }

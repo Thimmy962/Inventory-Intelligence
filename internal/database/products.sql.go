@@ -169,6 +169,7 @@ SELECT
   p.price,
   p.reorder_level,
   p.updated_at,
+  i.last_updated,
   CASE 
     WHEN i.quantity_on_hand = 0 THEN -2
     WHEN i.quantity_on_hand <= p.reorder_level THEN -1
@@ -188,6 +189,7 @@ type GetOneFullProductDetailRow struct {
 	Price          float64
 	ReorderLevel   int32
 	UpdatedAt      sql.NullTime
+	LastUpdated    sql.NullTime
 	StockStatus    int32
 }
 
@@ -201,6 +203,7 @@ func (q *Queries) GetOneFullProductDetail(ctx context.Context, id string) (GetOn
 		&i.Price,
 		&i.ReorderLevel,
 		&i.UpdatedAt,
+		&i.LastUpdated,
 		&i.StockStatus,
 	)
 	return i, err

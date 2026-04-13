@@ -13,7 +13,11 @@ import (
 	"sync"
 	"time"
 	"github.com/gorilla/mux"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
+
+var caser = cases.Title(language.English)
 
 type Handler struct {
 	server *app.Server
@@ -60,7 +64,7 @@ func (db *Handler) CreateProduct(writer http.ResponseWriter, req *http.Request) 
 	}
 
 	created_product, err := db.server.Queries.CreateProduct(req.Context(), database.CreateProductParams{
-		ProductName: product.ProductName, Price: product.Price, ReorderLevel: product.ReorderLevel,
+		ProductName: caser.String(product.ProductName), Price: product.Price, ReorderLevel: product.ReorderLevel,
 	})
 	if err != nil {
 		log.Printf("DB error value: %s", err.Error())
@@ -146,7 +150,7 @@ func (db *Handler) NewBulkPurchase(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, purchase := range purchases {
-		err = db.server.Queries.CreatePurchase(r.Context(),
+		_, err = db.server.Queries.CreatePurchase(r.Context(),
 			database.CreatePurchaseParams{ProductID: purchase.ProductID,
 				QuantityAdded: purchase.QuantityAdded})
 		if err != nil {
@@ -179,17 +183,17 @@ func (db *Handler) NewPurchase(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//creates new purchase
-	err = db.server.Queries.CreatePurchase(r.Context(),
+	pur, err := db.server.Queries.CreatePurchase(r.Context(),
 		database.CreatePurchaseParams{ProductID: purchase.ProductID,
 			QuantityAdded: purchase.QuantityAdded})
 
 	// if there is an error in creating new purchase return
 	if err != nil {
-		log.Println(err)
+		log.Println(err, "hi")
 		ProcessingError(w, http.StatusBadRequest, err)
 		return
 	}
-
+	purchase.ID = pur
 	// if new inventory or updating inventory fails delete the purchase 
 	if db.Inventory(&purchase, w, r) != nil {
 		err = db.server.Queries.DeleteProduct(r.Context(), purchase.ID)
@@ -210,7 +214,7 @@ func (db *Handler) Inventory(purchase *Purchase, w http.ResponseWriter, req *htt
 
 	data, err := db.server.Queries.GetInventory(req.Context(), id)
 
-	// if inventory dies not exists create a new one
+	// if inventory does not exists create a new one
 	if err != nil {
 		newErr := db.server.Queries.NewInventory(req.Context(), database.NewInventoryParams{ProductID: id, QuantityOnHand: quantityAdded})
 		
@@ -226,3 +230,8 @@ func (db *Handler) Inventory(purchase *Purchase, w http.ResponseWriter, req *htt
 	return db.server.Queries.UpdatedInventory(req.Context(), database.UpdatedInventoryParams{ProductID: id,
 		QuantityOnHand: quantityAdded + data.QuantityOnHand})
 }
+
+
+// func(handler *Handler) Adjustment(wr http.ResponseWriter, req *http.Request) {
+// 	var purchase Purchase
+// }

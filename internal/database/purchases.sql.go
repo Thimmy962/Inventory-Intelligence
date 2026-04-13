@@ -9,9 +9,10 @@ import (
 	"context"
 )
 
-const createPurchase = `-- name: CreatePurchase :exec
+const createPurchase = `-- name: CreatePurchase :one
 INSERT INTO purchases (id, product_id, quantity_added, purchase_date)
 VALUES (gen_random_uuid(), $1, $2, NOW())
+Returning id
 `
 
 type CreatePurchaseParams struct {
@@ -19,7 +20,18 @@ type CreatePurchaseParams struct {
 	QuantityAdded int32
 }
 
-func (q *Queries) CreatePurchase(ctx context.Context, arg CreatePurchaseParams) error {
-	_, err := q.db.ExecContext(ctx, createPurchase, arg.ProductID, arg.QuantityAdded)
+func (q *Queries) CreatePurchase(ctx context.Context, arg CreatePurchaseParams) (string, error) {
+	row := q.db.QueryRowContext(ctx, createPurchase, arg.ProductID, arg.QuantityAdded)
+	var id string
+	err := row.Scan(&id)
+	return id, err
+}
+
+const deletePurchase = `-- name: DeletePurchase :exec
+DELETE FROM purchases WHERE id = $1
+`
+
+func (q *Queries) DeletePurchase(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deletePurchase, id)
 	return err
 }
