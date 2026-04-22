@@ -7,20 +7,22 @@ package database
 
 import (
 	"context"
+	"time"
 )
 
 const addNewEWMA = `-- name: AddNewEWMA :exec
-INSERT INTO ewma (product_id, ewma)
-VALUES ($1, $2)
+INSERT INTO ewma (product_id, ewma, recorded_at)
+VALUES ($1, $2, $3)
 `
 
 type AddNewEWMAParams struct {
-	ProductID string
-	Ewma      float64
+	ProductID  string
+	Ewma       float64
+	RecordedAt time.Time
 }
 
 func (q *Queries) AddNewEWMA(ctx context.Context, arg AddNewEWMAParams) error {
-	_, err := q.db.ExecContext(ctx, addNewEWMA, arg.ProductID, arg.Ewma)
+	_, err := q.db.ExecContext(ctx, addNewEWMA, arg.ProductID, arg.Ewma, arg.RecordedAt)
 	return err
 }
 

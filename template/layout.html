@@ -322,6 +322,8 @@
             setTimeout(() => toast.remove(), 300);
         }
 
+
+        // for search bar on the layout page 
         let layouttypingTimer;
         let layoutDoneTypingInterval = 1000;
 
@@ -359,7 +361,7 @@
                         return res.json();
                     })
                     .then(data => {
-                        renderResults(data);
+                        renderLayoutResults(data);
                     })
                     .catch(error => {
                         console.error("There was an error with the request:", error.message);
@@ -368,7 +370,7 @@
             }
         }
 
-        function renderResults(results) {
+        function renderLayoutResults(results) {
             searchoverlay.innerHTML = "";
 
             if (!results || results.length === 0) {

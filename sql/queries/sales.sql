@@ -6,9 +6,6 @@ VALUES ($1, NOW()) RETURNING id;
 INSERT INTO sales_items (sales_id, product_id, quantity_sold, price_at_sale)
 VALUES ($1, $2, $3, $4) RETURNING id, product_id;
 
--- name: DeleteSalesItems :exec
-DELETE FROM sales_items WHERE sales_id = $1;
-
 -- name: GetProductInventory :one
 SELECT p.id, p.product_name, p.price, i.quantity_on_hand 
 FROM products p
@@ -25,3 +22,12 @@ VALUES ($1, $2, $3, NOW()) RETURNING id;
 
 -- name: DeleteAdjustment :exec
 DELETE FROM adjustments WHERE id = $1;
+
+
+-- Get the time when a sale was made
+-- name: GetSalesTime :one
+SELECT sale_date FROM sales WHERE ID = $1;
+
+-- Get all the items associated with a sale
+-- name: GetSalesItems :many
+SELECT * FROM sales_items WHERE sales_id = $1;

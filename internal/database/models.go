@@ -5,7 +5,6 @@
 package database
 
 import (
-	"database/sql"
 	"time"
 )
 
@@ -20,7 +19,7 @@ type Adjustment struct {
 type Ewma struct {
 	ID         int64
 	ProductID  string
-	RecordedAt sql.NullTime
+	RecordedAt time.Time
 	Ewma       float64
 }
 

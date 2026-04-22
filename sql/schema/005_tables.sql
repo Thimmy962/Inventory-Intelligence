@@ -1,0 +1,3 @@
+-- +goose up
+ALTER TABLE ewma
+ALTER COLUMN ewma TYPE NUMERIC(10,2);
