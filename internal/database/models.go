@@ -6,6 +6,7 @@ package database
 
 import (
 	"database/sql"
+	"time"
 )
 
 type Adjustment struct {
@@ -13,20 +14,27 @@ type Adjustment struct {
 	ProductID       string
 	QuantityChanged int32
 	Reason          string
-	AdjustmentDate  sql.NullTime
+	AdjustmentDate  time.Time
+}
+
+type Ewma struct {
+	ID         int64
+	ProductID  string
+	RecordedAt sql.NullTime
+	Ewma       float64
 }
 
 type Inventory struct {
 	ProductID      string
 	QuantityOnHand int32
-	LastUpdated    sql.NullTime
+	LastUpdated    time.Time
 }
 
 type Product struct {
 	ID           string
 	ProductName  string
-	CreatedAt    sql.NullTime
-	UpdatedAt    sql.NullTime
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 	Price        float64
 	ReorderLevel int32
 }
@@ -44,13 +52,13 @@ type Purchase struct {
 	ID            string
 	ProductID     string
 	QuantityAdded int32
-	PurchaseDate  sql.NullTime
+	PurchaseDate  time.Time
 }
 
 type Sale struct {
 	ID          int32
 	TotalAmount float64
-	SaleDate    sql.NullTime
+	SaleDate    time.Time
 }
 
 type SalesItem struct {

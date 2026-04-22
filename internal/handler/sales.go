@@ -5,6 +5,7 @@ import (
 	"log"
 	"main/internal/database"
 	"net/http"
+	"strconv"
 )
 
 // any given sales
@@ -56,29 +57,27 @@ func (db *Handler) CreateSales(wr http.ResponseWriter, req *http.Request) {
 	}
 
 	for index, product := range products {
-		analyticsData, err := db.server.Queries.CreateSalesItems(req.Context(), database.CreateSalesItemsParams{
+		_, err := db.server.Queries.CreateSalesItems(req.Context(), database.CreateSalesItemsParams{
 			SalesID: sales_id, ProductID: product.ID, PriceAtSale: product.Price, QuantitySold: items[index].Quantity_sold,
 		})
 		// if there was error in processing any item delete every other processed items and the sales it self
 		if err != nil {
 			ProcessingError(wr, http.StatusBadRequest, err)
-			// delete every other sales_item under this sales
-			db.server.Queries.DeleteSalesItems(req.Context(), sales_id)
-
-			// delete the sales itself
+			// delete the sales itself will also delete associated sales_items
+			// this is because of the cascade relationship between the foreign key
 			db.server.Queries.DeleteSales(req.Context(), sales_id)
 			return
 		}
-
-		db.channel <- analyticsData
 	}
 
 	for index, product := range products {
-		//quantity left = quantity before the sale - quantity sold
 		quantity_left := product.QuantityOnHand - items[index].Quantity_sold
 		db.server.Queries.UpdatedInventory(req.Context(), 
 		database.UpdatedInventoryParams{ProductID: product.ID, QuantityOnHand: quantity_left})
 	}
+
+	db.channel <- strconv.Itoa(int(sales_id))
+
 	respondWithJSON(wr, http.StatusCreated, map[string]string{
 		"status": "Sales Successful",
 	})

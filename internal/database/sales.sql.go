@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"time"
 )
 
 const createAdjustment = `-- name: CreateAdjustment :one
@@ -86,15 +87,6 @@ func (q *Queries) DeleteSales(ctx context.Context, id int32) error {
 	return err
 }
 
-const deleteSalesItems = `-- name: DeleteSalesItems :exec
-DELETE FROM sales_items WHERE sales_id = $1
-`
-
-func (q *Queries) DeleteSalesItems(ctx context.Context, salesID int32) error {
-	_, err := q.db.ExecContext(ctx, deleteSalesItems, salesID)
-	return err
-}
-
 const getProductInventory = `-- name: GetProductInventory :one
 SELECT p.id, p.product_name, p.price, i.quantity_on_hand 
 FROM products p
@@ -119,4 +111,50 @@ func (q *Queries) GetProductInventory(ctx context.Context, id string) (GetProduc
 		&i.QuantityOnHand,
 	)
 	return i, err
+}
+
+const getSalesItems = `-- name: GetSalesItems :many
+SELECT id, sales_id, product_id, quantity_sold, price_at_sale FROM sales_items WHERE sales_id = $1
+`
+
+// Get all the items associated with a sale
+func (q *Queries) GetSalesItems(ctx context.Context, salesID int32) ([]SalesItem, error) {
+	rows, err := q.db.QueryContext(ctx, getSalesItems, salesID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SalesItem
+	for rows.Next() {
+		var i SalesItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.SalesID,
+			&i.ProductID,
+			&i.QuantitySold,
+			&i.PriceAtSale,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSalesTime = `-- name: GetSalesTime :one
+SELECT sale_date FROM sales WHERE ID = $1
+`
+
+// Get the time when a sale was made
+func (q *Queries) GetSalesTime(ctx context.Context, id int32) (time.Time, error) {
+	row := q.db.QueryRowContext(ctx, getSalesTime, id)
+	var sale_date time.Time
+	err := row.Scan(&sale_date)
+	return sale_date, err
 }

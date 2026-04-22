@@ -2,8 +2,8 @@
 CREATE TABLE IF NOT EXISTS products (
     id TEXT PRIMARY KEY,
     product_name TEXT NOT NULL UNIQUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     price DECIMAL (10, 2) NOT NULL,
     reorder_level INTEGER NOT NULL DEFAULT 5
 );
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS purchases (
     id TEXT PRIMARY KEY,
     product_id TEXT NOT NULL,
     quantity_added INTEGER NOT NULL CHECK (quantity_added > 0),
-    purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS purchases (
 CREATE TABLE IF NOT EXISTS inventory (
     product_id TEXT PRIMARY KEY,
     quantity_on_hand INTEGER DEFAULT 0,
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS inventory (
 CREATE TABLE IF NOT EXISTS sales (
     id SERIAL PRIMARY KEY,
     total_amount DECIMAL(10,2) NOT NULL,
-    sale_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    sale_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS sales_items (
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS adjustments (
     product_id TEXT NOT NULL,
     quantity_changed INTEGER NOT NULL,
     reason TEXT NOT NULL,
-    adjustment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    adjustment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 

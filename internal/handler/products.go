@@ -21,11 +21,11 @@ var caser = cases.Title(language.English)
 
 type Handler struct {
 	server *app.Server
-	channel chan any
+	channel chan string
 	wg *sync.WaitGroup
 }
 
-func NewHandler(q *app.Server, channel chan any, w *sync.WaitGroup) *Handler {
+func NewHandler(q *app.Server, channel chan string, w *sync.WaitGroup) *Handler {
 	return &Handler{
 		server: q,
 		channel: channel,

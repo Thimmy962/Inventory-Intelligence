@@ -2,12 +2,15 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
+	"main/internal/analytics"
 	"main/internal/app"
 	"main/internal/database"
 	"net/http"
+	"strconv"
 )
 
 // called on bad request
@@ -78,14 +81,15 @@ func validateSale(req *http.Request, items []Sales_Item, query app.Server) ([]da
 }
 
 
-func (handler *Handler)StartWorker(workers int) {
+func (handler *Handler)StartWorker(ctx context.Context, workers int) {
 	log.Println("starting Workers")
 	log.Printf("%d Workers Starting\n", workers)
 
 	for i:=0; i < workers; i++ {
 		for salesID := range handler.channel {
 			handler.wg.Add(1)
-			log.Println("Running analytics on sales", salesID)
+			sales_id, _ := strconv.Atoi(salesID)
+			analytics.Analytics(ctx, handler.server.Queries, int32(sales_id))
 			handler.wg.Done()
 		}
 	}

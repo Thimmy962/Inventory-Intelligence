@@ -7,7 +7,7 @@ package database
 
 import (
 	"context"
-	"database/sql"
+	"time"
 )
 
 const createProduct = `-- name: CreateProduct :one
@@ -188,8 +188,8 @@ type GetOneFullProductDetailRow struct {
 	QuantityOnHand int32
 	Price          float64
 	ReorderLevel   int32
-	UpdatedAt      sql.NullTime
-	LastUpdated    sql.NullTime
+	UpdatedAt      time.Time
+	LastUpdated    time.Time
 	StockStatus    int32
 }
 

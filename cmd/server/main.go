@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"log"
 	"main/internal/app"
@@ -54,13 +55,14 @@ func main() {
 	// serMux := http.NewServeMux()
 	serMux := mux.NewRouter().StrictSlash(true)
 	server := http.Server{Addr: ":"+ port, Handler: serMux}
-	channel := make(chan any, 100)
+	channel := make(chan string, 100)
 	var wg sync.WaitGroup
 	dbQuery := handler.NewHandler(dbServer, channel, &wg)
-
-	go dbQuery.StartWorker(workers)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go dbQuery.StartWorker(ctx, workers)
 	
-
+	serMux.HandleFunc("/bulkcreate", dbServer.CORSMiddleware(dbQuery.BulkCreateProducts)).Methods("POST")
 	serMux.HandleFunc("/newproduct", dbServer.CORSMiddleware(dbQuery.CreateProduct)).Methods("POST")
 	serMux.HandleFunc("/product/{id}", dbServer.CORSMiddleware(dbQuery.GetProduct)).Methods("GET")
 	serMux.HandleFunc("/products", dbServer.CORSMiddleware(dbQuery.GetProducts)).Methods("GET")
