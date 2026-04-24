@@ -10,14 +10,18 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func (db *Handler) TopProducts(wr http.ResponseWriter, req *http.Request) {
+	list, _ := db.server.Queries.GetTopProduct(req.Context())
+	respondWithJSON(wr, http.StatusOK, list)
+}
 
 func (db *Handler) Index(wr http.ResponseWriter, req *http.Request) {
-	list, _ := db.server.Queries.GetFullProductDetailView(req.Context())
+	list, _ := db.server.Queries.GetTopProduct(req.Context())
 	tmpl := template.Must(template.ParseFiles(
  	   "template/layout.html",
   	  "template/index.html",
 	))
-	lists := map[string][]database.Productdetail {
+	lists := map[string][]database.GetTopProductRow {
 		"products": list,
 	}
 	

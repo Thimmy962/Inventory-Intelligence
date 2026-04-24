@@ -19,6 +19,8 @@ import (
 
 var port = "8000"
 
+
+
 func main() {
 	workers := 3
     var err error // Initial declaration
@@ -74,6 +76,7 @@ func main() {
 	serMux.HandleFunc("/search", dbServer.CORSMiddleware(dbQuery.Search)).Methods("GET")
 	serMux.HandleFunc("/edit/{id}", dbServer.HTMLCORSMiddleware(dbQuery.EditProduct)).Methods("GET", "PUT")
 	serMux.HandleFunc("/adjustment", dbServer.CORSMiddleware(dbQuery.Adjustment)).Methods("POST")
+	serMux.HandleFunc("/topselling", dbServer.CORSMiddleware(dbQuery.TopProducts)).Methods("GET")
 
 	log.Println(server.ListenAndServe());
 }

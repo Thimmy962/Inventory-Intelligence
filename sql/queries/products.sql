@@ -67,3 +67,40 @@ WHERE p.id = $1;
 UPDATE products
 SET product_name = $2, price = $3, reorder_level = $4, updated_at = NOW()
 WHERE id = $1;
+
+
+-- name: GetTopProduct :many
+SELECT 
+  p.id,
+  p.product_name,
+  i.quantity_on_hand,
+  p.price,
+  p.reorder_level,
+  p.updated_at,
+  i.last_updated,
+  e.ewma,
+  CASE 
+    WHEN i.quantity_on_hand = 0 THEN -2
+    WHEN i.quantity_on_hand <= p.reorder_level THEN -1
+    WHEN i.quantity_on_hand <= p.reorder_level * 1.5 THEN 0
+    ELSE 1
+  END AS stock_status
+FROM products p
+JOIN inventory i
+  ON p.id = i.product_id
+JOIN (
+    SELECT *
+    FROM (
+        SELECT *,
+               ROW_NUMBER() OVER (
+                   PARTITION BY product_id
+                   ORDER BY recorded_at DESC
+               ) AS rn
+        FROM ewma
+        WHERE recorded_at >= DATE_TRUNC('week', CURRENT_DATE)
+    ) t
+    WHERE rn = 1
+) e
+  ON p.id = e.product_id
+ORDER BY e.ewma DESC
+LIMIT 10;

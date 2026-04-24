@@ -261,6 +261,88 @@ func (q *Queries) GetProducts(ctx context.Context) ([]Product, error) {
 	return items, nil
 }
 
+const getTopProduct = `-- name: GetTopProduct :many
+SELECT 
+  p.id,
+  p.product_name,
+  i.quantity_on_hand,
+  p.price,
+  p.reorder_level,
+  p.updated_at,
+  i.last_updated,
+  e.ewma,
+  CASE 
+    WHEN i.quantity_on_hand = 0 THEN -2
+    WHEN i.quantity_on_hand <= p.reorder_level THEN -1
+    WHEN i.quantity_on_hand <= p.reorder_level * 1.5 THEN 0
+    ELSE 1
+  END AS stock_status
+FROM products p
+JOIN inventory i
+  ON p.id = i.product_id
+JOIN (
+    SELECT id, product_id, recorded_at, ewma, rn
+    FROM (
+        SELECT id, product_id, recorded_at, ewma,
+               ROW_NUMBER() OVER (
+                   PARTITION BY product_id
+                   ORDER BY recorded_at DESC
+               ) AS rn
+        FROM ewma
+        WHERE recorded_at >= DATE_TRUNC('week', CURRENT_DATE)
+    ) t
+    WHERE rn = 1
+) e
+  ON p.id = e.product_id
+ORDER BY e.ewma DESC
+LIMIT 10
+`
+
+type GetTopProductRow struct {
+	ID             string
+	ProductName    string
+	QuantityOnHand int32
+	Price          float64
+	ReorderLevel   int32
+	UpdatedAt      time.Time
+	LastUpdated    time.Time
+	Ewma           float64
+	StockStatus    int32
+}
+
+func (q *Queries) GetTopProduct(ctx context.Context) ([]GetTopProductRow, error) {
+	rows, err := q.db.QueryContext(ctx, getTopProduct)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetTopProductRow
+	for rows.Next() {
+		var i GetTopProductRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProductName,
+			&i.QuantityOnHand,
+			&i.Price,
+			&i.ReorderLevel,
+			&i.UpdatedAt,
+			&i.LastUpdated,
+			&i.Ewma,
+			&i.StockStatus,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateProductPrice = `-- name: UpdateProductPrice :exec
 UPDATE products SET price = $2 WHERE id = $1
 `

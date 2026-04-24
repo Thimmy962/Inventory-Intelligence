@@ -42,12 +42,6 @@ type Product struct {
 	ProductName  string    `json:"name"`
 }
 
-//used for creating a new product, purchase and inventory
-type NewProduct struct {
-	// todo...
-}
-
-// Used for receiving data to created new purchase or new adjustment
 type PurAdj struct {
 	ID            string `json:"id"`
 	ProductID     string `json:"productId"`

@@ -257,6 +257,18 @@
             return result
         }
 
+        async function asyncGet(url) {
+            const res = await fetch(url, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            });
+            const result = await res.json()
+            if (!res.ok) {
+                throw new Error(result.error || `HTTP error! status ${res.status}`);
+            }   
+            return result
+        }
+
         const form = document.getElementById("newProductForm");
 
         form.addEventListener('submit', async (e) => {
