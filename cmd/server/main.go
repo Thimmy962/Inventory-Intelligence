@@ -9,8 +9,11 @@ import (
 	"main/internal/handler"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
 	"sync"
+	"syscall"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -18,8 +21,6 @@ import (
 )
 
 var port = "8000"
-
-
 
 func main() {
 	workers := 3
@@ -60,8 +61,7 @@ func main() {
 	channel := make(chan string, 100)
 	var wg sync.WaitGroup
 	dbQuery := handler.NewHandler(dbServer, channel, &wg)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	go dbQuery.StartWorker(ctx, workers)
 	
 	serMux.HandleFunc("/bulkcreate", dbServer.CORSMiddleware(dbQuery.BulkCreateProducts)).Methods("POST")
@@ -77,6 +77,19 @@ func main() {
 	serMux.HandleFunc("/edit/{id}", dbServer.HTMLCORSMiddleware(dbQuery.EditProduct)).Methods("GET", "PUT")
 	serMux.HandleFunc("/adjustment", dbServer.CORSMiddleware(dbQuery.Adjustment)).Methods("POST")
 	serMux.HandleFunc("/topselling", dbServer.CORSMiddleware(dbQuery.TopProducts)).Methods("GET")
+	serMux.HandleFunc("/trends/{pid}", dbServer.CORSMiddleware(dbQuery.ProductTrend)).Methods("GET")
 
-	log.Println(server.ListenAndServe());
+	sigs := make(chan os.Signal, 2)
+	signal.Notify(sigs, syscall.SIGINT)
+
+	go func(){
+			sig := <-sigs 
+			log.Println("Received Signal: ", sig)
+			server.Shutdown(ctx)
+			cancel()
+	}()
+
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+    log.Fatal(err)
+	}
 }

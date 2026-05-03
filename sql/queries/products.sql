@@ -97,7 +97,7 @@ JOIN (
                    ORDER BY recorded_at DESC
                ) AS rn
         FROM ewma
-        WHERE recorded_at >= DATE_TRUNC('week', CURRENT_DATE)
+        WHERE recorded_at >= CURRENT_DATE - INTERVAL '30 days'
     ) t
     WHERE rn = 1
 ) e

@@ -10,9 +10,6 @@
         <h2 class="text-4xl font-extrabold text-on-surface tracking-tight leading-none mb-2">
           Edit Product
         </h2>
-        <p class="text-outline font-medium">
-          Refine your catalog data for premium presentation.
-        </p>
       </div>
 
       <div class="flex gap-4">
@@ -139,27 +136,37 @@
       </div>
 
       <!-- Footer -->
-      <div class="mt-16 pt-8 border-t border-outline-variant/10 flex items-center justify-between">
-        <div class="flex items-center gap-2 text-outline">
-          <span class="material-symbols-outlined text-sm">info</span>
-          {{if .UpdatedAt.Valid}}
-            Product last updated {{.UpdatedAt.Time.Format "02 Jan 2006, 15:04"}}
-          {{else}}
-            Never updated
-          {{end}}
-          <span class="material-symbols-outlined text-sm">info</span>
-          {{if .LastUpdated.Valid}}
-            Inventory last updated {{.LastUpdated.Time.Format "02 Jan 2006, 15:04"}}
-          {{else}}
-            Never updated
-          {{end}}
+        <div class="mt-16 pt-8 border-t border-outline-variant/10 flex items-center justify-between">
+        <div class="flex items-center gap-6 text-outline text-sm">
+            
+            <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">info</span>
+            <span>
+                Product: 
+                <span class="font-medium text-on-surface-variant">
+                {{if .UpdatedAt}}{{.UpdatedAt.Format "02 Jan 2006, 15:04"}}{{else}}Never{{end}}
+                </span>
+            </span>
+            </div>
+
+            <div class="h-4 w-[1px] bg-outline-variant/30"></div>
+
+            <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">history</span>
+            <span>
+                Inventory: 
+                <span class="font-medium text-on-surface-variant">
+                {{if .LastUpdated}}{{.LastUpdated.Format "02 Jan 2006, 15:04"}}{{else}}Never{{end}}
+                </span>
+            </span>
+            </div>
         </div>
 
         <a href="/index"
-          class="text-on-surface font-bold text-sm px-4 py-2 hover:bg-surface-container-low rounded-lg transition-colors">
-          Discard Changes
+            class="text-on-surface font-bold text-sm px-4 py-2 hover:bg-error/10 hover:text-error rounded-lg transition-all duration-200 border border-transparent hover:border-error/20">
+            Discard Changes
         </a>
-      </div>
+        </div>
 
       <!-- Stock In -->
       <div class="mt-12">
@@ -255,7 +262,9 @@
         </span>
         <div class="h-px flex-1 bg-outline-variant/20"></div>
       </div>
-
+        
+        <canvas id="myChart" style="width:100%;max-width:700px">
+        </canvas>
     </div>
 
     <!-- Separator -->
@@ -278,7 +287,6 @@
             price:  Number(document.getElementById("price").value),
             id: document.getElementById("product_id").value
         }
-        console.log(data)
         try {
             const result = await asyncSubmit(`/edit/${data.id}`, "PUT", data);
             showToast("Edit successful", "success");
@@ -338,5 +346,147 @@
       }
 
     })
+
+   document.addEventListener("DOMContentLoaded", async () => {
+    const idElement = document.getElementById("product_id");
+    if (!idElement) return console.error("Element 'product_id' not found");
+
+    const id = idElement.value;
+    const canvas = document.getElementById("myChart");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+
+    let zoom = 1;
+    let offsetX = 0;
+    let isDragging = false;
+    let lastX = 0;
+
+    try {
+        const data = await asyncGet(`/trends/${id}`);
+        if (!data || data.length === 0) return;
+
+        // Sort
+        data.sort((a, b) => new Date(a.RecordedAt) - new Date(b.RecordedAt));
+
+        // Raw points
+        const rawPoints = data.map((d, i) => ({
+            x: i,
+            y: d.Ewma
+        }));
+
+        // 🔥 EWMA smoothing (secondary smoothing)
+        const alpha = 0.2;
+        let prev = rawPoints[0].y;
+        const smoothPoints = rawPoints.map(p => {
+            const ewma = alpha * p.y + (1 - alpha) * prev;
+            prev = ewma;
+            return { x: p.x, y: ewma };
+        });
+
+        function draw() {
+            const padding = 50;
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            const minX = 0;
+            const maxX = rawPoints.length - 1;
+
+            const allY = [...rawPoints.map(p => p.y), ...smoothPoints.map(p => p.y)];
+            const minY = Math.min(...allY);
+            const maxY = Math.max(...allY);
+            const rangeY = (maxY - minY) || 1;
+
+            const scaleX = x =>
+                padding + ((x - offsetX) / (maxX / zoom)) * (w - 2 * padding);
+
+            const scaleY = y =>
+                h - padding - ((y - minY) / rangeY) * (h - 2 * padding);
+
+            // 🟩 GRID LINES
+            ctx.strokeStyle = "#eee";
+            ctx.lineWidth = 1;
+
+            const gridYCount = 5;
+            for (let i = 0; i <= gridYCount; i++) {
+                const y = padding + (i / gridYCount) * (h - 2 * padding);
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(w - padding, y);
+                ctx.stroke();
+            }
+
+            const gridXCount = 6;
+            for (let i = 0; i <= gridXCount; i++) {
+                const x = padding + (i / gridXCount) * (w - 2 * padding);
+                ctx.beginPath();
+                ctx.moveTo(x, padding);
+                ctx.lineTo(x, h - padding);
+                ctx.stroke();
+            }
+
+            // 🔵 RAW LINE
+            ctx.beginPath();
+            ctx.strokeStyle = "#007bff";
+            ctx.lineWidth = 2;
+
+            rawPoints.forEach((p, i) => {
+                const px = scaleX(p.x);
+                const py = scaleY(p.y);
+                i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+            });
+            ctx.stroke();
+
+            // 🔴 EWMA SMOOTH LINE
+            ctx.beginPath();
+            ctx.strokeStyle = "#ff4d4f";
+            ctx.lineWidth = 3;
+
+            smoothPoints.forEach((p, i) => {
+                const px = scaleX(p.x);
+                const py = scaleY(p.y);
+                i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+            });
+            ctx.stroke();
+        }
+
+        draw();
+
+        // 🖱️ ZOOM (mouse wheel)
+        canvas.addEventListener("wheel", e => {
+            e.preventDefault();
+            const zoomFactor = 0.1;
+            zoom += e.deltaY < 0 ? zoomFactor : -zoomFactor;
+            zoom = Math.max(1, Math.min(zoom, 10));
+            draw();
+        });
+
+        // 🖱️ PAN (drag)
+        canvas.addEventListener("mousedown", e => {
+            isDragging = true;
+            lastX = e.clientX;
+        });
+
+        canvas.addEventListener("mouseup", () => isDragging = false);
+        canvas.addEventListener("mouseleave", () => isDragging = false);
+
+        canvas.addEventListener("mousemove", e => {
+            if (!isDragging) return;
+
+            const dx = e.clientX - lastX;
+            offsetX -= dx * 0.01;
+            lastX = e.clientX;
+
+            draw();
+        });
+
+    } catch (err) {
+        canvas.innerText = "No Data yet for this product"
+    }
+}); 
+
 </script>
 {{ end }}

@@ -15,6 +15,19 @@ func (db *Handler) TopProducts(wr http.ResponseWriter, req *http.Request) {
 	respondWithJSON(wr, http.StatusOK, list)
 }
 
+func (db *Handler) ProductTrend(wr http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	product_id := vars["pid"]
+
+	trends, err := db.server.Queries.ProductTrend(req.Context(), product_id)
+	if err != nil {
+		ProcessingError(wr, http.StatusNotFound, nil)
+		return
+	}
+	respondWithJSON(wr, http.StatusOK, trends)
+}
+
+
 func (db *Handler) Index(wr http.ResponseWriter, req *http.Request) {
 	list, _ := db.server.Queries.GetTopProduct(req.Context())
 	tmpl := template.Must(template.ParseFiles(

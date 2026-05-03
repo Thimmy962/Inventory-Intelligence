@@ -42,3 +42,37 @@ func (q *Queries) GetRecentProductEWMA(ctx context.Context, productID string) (E
 	)
 	return i, err
 }
+
+const productTrend = `-- name: ProductTrend :many
+SELECT recorded_at, ewma
+FROM ewma
+WHERE product_id = $1 AND recorded_at >= CURRENT_DATE - INTERVAL '30 days'
+`
+
+type ProductTrendRow struct {
+	RecordedAt time.Time
+	Ewma       float64
+}
+
+func (q *Queries) ProductTrend(ctx context.Context, productID string) ([]ProductTrendRow, error) {
+	rows, err := q.db.QueryContext(ctx, productTrend, productID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ProductTrendRow
+	for rows.Next() {
+		var i ProductTrendRow
+		if err := rows.Scan(&i.RecordedAt, &i.Ewma); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
