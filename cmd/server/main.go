@@ -14,7 +14,6 @@ import (
 	"sync"
 	"syscall"
 	"time"
-
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -22,17 +21,39 @@ import (
 
 var port = "8000"
 
+var requiredEnv = []string{
+	"DB_URL",
+	"SECRET_STRING",
+}
+
+
+func MustLoadEnv() {
+	var enverror = 0
+	err := godotenv.Load()
+	if err != nil {
+        log.Println(err)
+        os.Exit(1)
+    }
+	for _, key := range requiredEnv {
+		if os.Getenv(key) == "" {
+			log.Printf("env vars '%v', is missing\n", key)
+			enverror++
+		}
+	}
+
+	if enverror > 0 {
+		log.Println("The environmental Variables ablove are missing")
+		os.Exit(1)
+	}
+}
+
+
 func main() {
+	MustLoadEnv()
 	workers := 3
     var err error // Initial declaration
 
     // Use = because err is already declared
-    err = godotenv.Load() 
-    if err != nil {
-        log.Println(err)
-        os.Exit(1)
-    }
-
     if len(os.Args) > 1 {
         sworkers := os.Args[1]
         // Use = here as well to update the existing variables
@@ -52,7 +73,8 @@ func main() {
 
 	dbServer := &app.Server {
 		DB: db,
-		Queries: database.New(db),		
+		Queries: database.New(db),
+		SecretKey: os.Getenv("secret_key"),	
 	}
 
 	// serMux := http.NewServeMux()
@@ -78,6 +100,8 @@ func main() {
 	serMux.HandleFunc("/adjustment", dbServer.CORSMiddleware(dbQuery.Adjustment)).Methods("POST")
 	serMux.HandleFunc("/topselling", dbServer.CORSMiddleware(dbQuery.TopProducts)).Methods("GET")
 	serMux.HandleFunc("/trends/{pid}", dbServer.CORSMiddleware(dbQuery.ProductTrend)).Methods("GET")
+	serMux.HandleFunc("/login", dbServer.HTMLCORSMiddleware(dbQuery.Login)).Methods("GET", "POST")
+	// serMux.HandleFunc("/register", dbSer)
 
 	sigs := make(chan os.Signal, 2)
 	signal.Notify(sigs, syscall.SIGINT)

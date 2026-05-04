@@ -86,6 +86,24 @@ func (db *Handler) GetProducts(writer http.ResponseWriter, req *http.Request) {
 }
 
 func (db *Handler) BulkCreateProducts(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	_, ok := ctx.Value("id").(string)
+	if !ok {
+		http.Error(w, "An error Occured", http.StatusBadRequest)
+		return
+	}
+
+	level, ok := ctx.Value("level").(bool)
+	if !ok {
+		http.Error(w, "An error Occured", http.StatusBadRequest)
+		return
+	}
+
+	if !level {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	var products []Product
 
 	err := json.NewDecoder(r.Body).Decode(&products)
@@ -97,7 +115,7 @@ func (db *Handler) BulkCreateProducts(w http.ResponseWriter, r *http.Request) {
 
 	for _, p := range products {
 		_, err := db.server.Queries.CreateProduct(
-			r.Context(),
+			ctx,
 			database.CreateProductParams{
 				ProductName:  p.ProductName,
 				Price:        p.Price,

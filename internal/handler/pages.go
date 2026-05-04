@@ -1,12 +1,16 @@
 package handler
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"main/internal/database"
 	"net/http"
+
 	"github.com/gorilla/mux"
 )
 
@@ -25,6 +29,38 @@ func (db *Handler) ProductTrend(wr http.ResponseWriter, req *http.Request) {
 		return
 	}
 	respondWithJSON(wr, http.StatusOK, trends)
+}
+
+
+func (db *Handler) Login(wr http.ResponseWriter, req *http.Request) {
+	if req.Method == "POST" {
+		loginDetail  := struct {
+			username string `json:"username"`
+			password string `json:"password"`
+		}{}
+		err := json.NewDecoder(req.Body).Decode(&loginDetail)
+		if err == io.EOF {
+			log.Println(err)
+			ProcessingError(wr, http.StatusBadRequest, err)
+			return
+		}
+		data, err := db.server.Queries.LoginUser(req.Context(), 
+			database.LoginUserParams{Username: loginDetail.username, Pword: loginDetail.password})
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				err = fmt.Errorf("Staff with username and password not found")
+			}
+			ProcessingError(wr, http.StatusNotFound, err)
+			return
+		}
+		respondWithJSON(wr, http.StatusOK, data)
+		return
+	}
+	tmpl := template.Must(template.ParseFiles(
+ 	   "template/login.html",
+	))
+	
+	tmpl.ExecuteTemplate(wr, "login.html", nil)
 }
 
 
@@ -72,7 +108,6 @@ func (handler *Handler)EditProduct(wr http.ResponseWriter, req *http.Request) {
 		var product Product
 		err := json.NewDecoder(req.Body).Decode(&product)
 		if err != nil {
-			log.Println(err)
 			ProcessingError(wr, 400, err)
 			return
 		}

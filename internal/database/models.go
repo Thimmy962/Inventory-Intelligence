@@ -67,3 +67,13 @@ type SalesItem struct {
 	QuantitySold int32
 	PriceAtSale  float64
 }
+
+type Staff struct {
+	ID        string
+	FirstName string
+	LastName  string
+	Dob       time.Time
+	Username  string
+	Pword     string
+	IsManager bool
+}

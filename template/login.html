@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Shalom Gate - Sign In</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#006d40",
+                        "tertiary-container": "#cda628",
+                        "on-primary-fixed": "#002110",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#606663",
+                        "inverse-surface": "#2e3131",
+                        "secondary-fixed-dim": "#c2c8c5",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#fdfff9",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#171d1b",
+                        "inverse-primary": "#70db9d",
+                        "secondary-fixed": "#dee4e0",
+                        "surface-container-high": "#e7e8e8",
+                        "secondary-container": "#dee4e0",
+                        "surface-bright": "#f8f9f9",
+                        "primary-fixed": "#8df8b7",
+                        "on-tertiary-container": "#4f3d00",
+                        "primary-container": "#008751",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#584400",
+                        "surface": "#f8f9f9",
+                        "on-surface-variant": "#3e4a41",
+                        "background": "#f8f9f9",
+                        "on-primary-fixed-variant": "#00522f",
+                        "secondary": "#5a605d",
+                        "on-tertiary-fixed": "#241a00",
+                        "outline-variant": "#bdcabe",
+                        "surface-dim": "#d9dada",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f3f4f4",
+                        "primary-fixed-dim": "#70db9d",
+                        "on-background": "#191c1c",
+                        "on-secondary-fixed-variant": "#424846",
+                        "surface-container-highest": "#e1e3e3",
+                        "inverse-on-surface": "#f0f1f1",
+                        "error-container": "#ffdad6",
+                        "surface-container": "#edeeee",
+                        "tertiary-fixed-dim": "#ecc243",
+                        "tertiary": "#745b00",
+                        "on-primary": "#ffffff",
+                        "outline": "#6e7a70",
+                        "primary": "#006b3f",
+                        "surface-variant": "#e1e3e3",
+                        "tertiary-fixed": "#ffe08d",
+                        "on-surface": "#191c1c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "display": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-surface text-on-surface min-h-screen flex items-center justify-center p-6 selection:bg-primary-fixed selection:text-on-primary-fixed">
+    <main class="w-full max-w-md">
+        <!-- Brand Identity Container -->
+        <div class="flex flex-col items-center mb-10 text-center">
+            <div class="mb-4 bg-primary-container p-3 rounded-full shadow-lg shadow-primary/10">
+                <span class="material-symbols-outlined text-on-primary-container text-4xl" data-icon="storefront">storefront</span>
+            </div>
+            <h1 class="text-3xl font-extrabold text-on-surface tracking-tighter mb-2">ShalomGate</h1>
+        </div>
+
+        <!-- Login Card -->
+        <div class="bg-surface-container-lowest p-8 md:p-10 rounded-[2rem] shadow-[0px_20px_40px_rgba(25,28,28,0.06)] relative overflow-hidden">
+            <!-- Editorial Accent Decor -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-primary-fixed/20 blur-3xl -mr-16 -mt-16"></div>
+
+            <div class="relative z-10">
+                <h2 class="text-2xl font-bold text-on-surface mb-8">Sign in to your store</h2>
+
+                <form id="login" class="space-y-6" onsubmit="Login(); return false;">
+                    
+                    <!-- Input Field: Username -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-on-surface-variant ml-1" for="username">Username</label>
+                        <div class="group">
+                            <!-- Note: Cleaned up duplicate 'id' attributes here -->
+                            <input id="username" name="username" type="text" placeholder="Enter Username"
+                                class="w-full bg-surface-container-highest border-none border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-xl px-4 py-4 text-on-surface placeholder-outline transition-all duration-200" />
+                        </div>
+                    </div>
+
+                    <!-- Input Field: Password -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center px-1">
+                            <label class="block text-sm font-semibold text-on-surface-variant" for="password">Password</label>
+                            <a class="text-xs font-semibold text-primary hover:text-primary-container transition-colors" href="#">Forgot Password?</a>
+                        </div>
+                        <div class="relative group">
+                            <input id="password" name="password" type="password" placeholder="••••••••"
+                                class="w-full bg-surface-container-highest border-none border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-xl px-4 py-4 text-on-surface placeholder-outline transition-all duration-200" />
+                            <button class="absolute right-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary" type="button">
+                                <span class="material-symbols-outlined text-xl" data-icon="visibility">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Primary Action -->
+                    <div class="pt-4">
+                        <!-- 3. Removed 'onsubmit' from button (the form handles it now) -->
+                        <button type="submit" 
+                            class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold py-4 px-6 rounded-xl shadow-lg shadow-primary/20 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
+                            Login to Dashboard
+                            <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Editorial Visual Element (Masonry Style Image) -->
+                <div class="mt-10 pt-10 border-t border-outline-variant/15">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-4">
+                            <div class="rounded-2xl overflow-hidden h-32 relative">
+                                <img class="w-full h-full object-cover" alt="Fresh organic bell peppers" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyUAnpcurhKjoPYM7rbt0uKVdEMODsjxu6AoL0h_RZ5F1LgOZrRzEWlCaijtbzOvaXccX6Ni7sVDadfqhT7jtGBi68Pla39q1cJIY9iaAXXXaWejHzXJCp65Fy_hGlvnr_Ck8WFm5Bs9L-U6-WYtemeWf9A540zlHBeBB4ESGbMJro0Obh8WogcqcyDkNyk0IDOMPrpKYPDwg8I2dQNB3Jln0mB0odBHaheKfKm-s7uADR4DIuCiPb23CPyGBMAvpLowTilr0UIA" />
+                            </div>
+                            <div class="bg-secondary-container p-4 rounded-2xl">
+                                <p class="text-[10px] uppercase tracking-widest font-bold text-on-secondary-container mb-1">Status</p>
+                                <p class="text-sm font-semibold text-primary">Connected</p>
+                            </div>
+                        </div>
+                        <div class="rounded-2xl overflow-hidden h-full relative">
+                            <img class="w-full h-full object-cover" alt="Modern grocery store interior" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqKczJPPqtGUJ9iTXidTxhUNhgmYwK4-zTewq1lyrb3xDS9EAO9uIs-EZPisZjFjXjVLc1jn0oCgM0yVYVDxkCgnSJvW_8Fh0m4i1hxazGqevNcGuHKTkRiYl4Pvrvm0HX8ajOoSvLapbScQRXWVvhfSdwTeIi2Oz98jI3HK694yApGmNej2X6vlLzUUtwDbKYT26kaTKX5HxF5Z6lKvbxpT29_ffw-YN3S8ulEK5bnw3AanEKXIV0zw4nefnYrWRDW6JwmaxENA" />
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-on-surface/80 to-transparent">
+                                <p class="text-xs text-surface-container-lowest font-medium">Naira Flow v2.4</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 space-y-3"></div>
+</body>
+<script>
+    async function asyncSubmit(url, met, data = null) {
+        const res = await fetch(url, {
+            method: met,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+        let result = await res.json()
+        if (!res.ok) {
+            throw new Error(result.error || `HTTP error! status ${res.status}`);
+        }
+        return result
+    }
+
+
+    async function Login() {
+        const username = document.getElementById("username").value
+        const password = document.getElementById("password").value
+        const data = {
+            username: username, password: password
+        }
+        
+        try {
+            const res = await asyncSubmit("/login", "POST", data)
+        } catch (error) {
+            console.log(error)
+            showToast(error.message,"error")
+            // window.location.replace("/");
+        }
+    }
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toastContainer");
+
+            const toast = document.createElement("div");
+
+            const baseStyles =
+                "px-4 py-3 rounded-lg shadow-lg text-white flex items-center justify-between gap-3 min-w-[250px] max-w-[300px] transition-all duration-300 transform translate-y-[-20px] opacity-0";
+
+            const typeStyles = {
+                success: "bg-green-600",
+                error: "bg-red-600"
+            };
+
+            toast.className = `${baseStyles} ${typeStyles[type] || typeStyles.success}`;
+
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button class="text-white/80 hover:text-white">&times;</button>
+            `;
+
+            container.appendChild(toast);
+
+            // Trigger animation (enter)
+            requestAnimationFrame(() => {
+                toast.classList.remove("translate-y-[-20px]", "opacity-0");
+            });
+
+            // Close button
+            toast.querySelector("button").addEventListener("click", () => {
+                removeToast(toast);
+            });
+
+            // Auto remove
+            setTimeout(() => {
+                removeToast(toast);
+            }, 1000);
+        }
+
+        function removeToast(toast) {
+            toast.classList.add("opacity-0", "translate-y-[-20px]");
+            setTimeout(() => toast.remove(), 300);
+        }
+</script>
+</html>
