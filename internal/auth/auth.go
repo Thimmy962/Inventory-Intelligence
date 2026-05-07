@@ -4,17 +4,39 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"runtime"
 	"strings"
 	"time"
 
+	"github.com/alexedwards/argon2id"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
-func makeTokens(secretKey string, id uuid.UUID, expiresIn time.Duration) (string, error) {
+var params = &argon2id.Params{
+	Memory:      128 * 1024,
+	Iterations:  4,
+	Parallelism: uint8(runtime.NumCPU()),
+	SaltLength:  16,
+	KeyLength:   16,
+}
+
+func CreateHash(password string) (string, error) {
+	return argon2id.CreateHash(password, params)
+}
+
+
+func CheckHash(password, hash string) (bool, error) {
+	return argon2id.ComparePasswordAndHash(password, hash)
+}
+
+/**
+ * Used to make authentication/access tokens
+*/
+func MakeTokens(secretKey string, id uuid.UUID, expiresIn time.Duration) (string, error) {
 
 	now := time.Now()
-	regClaims := jwt.RegisteredClaims {
+	regClaims := jwt.RegisteredClaims{
 		Issuer: "ShalomGate", IssuedAt: jwt.NewNumericDate(now), ExpiresAt: jwt.NewNumericDate(now.Add(expiresIn)), Subject: id.String(),
 	}
 
@@ -28,8 +50,8 @@ func makeTokens(secretKey string, id uuid.UUID, expiresIn time.Duration) (string
 }
 
 
-func ValidateToken(tokenString, secretKey string) (uuid.UUID, error){
-	claims := jwt.MapClaims {}
+func ValidateToken(tokenString, secretKey string) (uuid.UUID, error) {
+	claims := jwt.MapClaims{}
 
 	// Parse the token using your secret
 	_, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
@@ -42,18 +64,16 @@ func ValidateToken(tokenString, secretKey string) (uuid.UUID, error){
 
 	sub, ok := claims["sub"].(string)
 	if !ok {
-		return uuid.Nil , fmt.Errorf("invalid subject claim")
+		return uuid.Nil, fmt.Errorf("invalid subject claim")
 	}
-	
+
 	userID, err := uuid.Parse(sub)
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	return userID, nil;	
+	return userID, nil
 }
-
-
 
 func GetBearerToken(headers http.Header, secret string) (string, error) {
 	// extract the authorization header
@@ -76,7 +96,6 @@ func GetBearerToken(headers http.Header, secret string) (string, error) {
 	if tokenString == "" {
 		return "", fmt.Errorf("bearer token is empty")
 	}
-
 
 	id, err := ValidateToken(tokenString, secret)
 	if err != nil {

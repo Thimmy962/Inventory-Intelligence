@@ -9,6 +9,30 @@ import (
 	"context"
 )
 
+const createStaff = `-- name: CreateStaff :exec
+INSERT INTO staffs (id, first_name, last_name, pword, is_manager, username)
+VALUES (gen_random_uuid(), $1, $2, $3, $4, $5)
+`
+
+type CreateStaffParams struct {
+	FirstName string
+	LastName  string
+	Pword     string
+	IsManager bool
+	Username  string
+}
+
+func (q *Queries) CreateStaff(ctx context.Context, arg CreateStaffParams) error {
+	_, err := q.db.ExecContext(ctx, createStaff,
+		arg.FirstName,
+		arg.LastName,
+		arg.Pword,
+		arg.IsManager,
+		arg.Username,
+	)
+	return err
+}
+
 const getLevel = `-- name: GetLevel :one
 SELECT is_manager FROM staffs WHERE id = $1
 `
@@ -21,24 +45,49 @@ func (q *Queries) GetLevel(ctx context.Context, id string) (bool, error) {
 }
 
 const loginUser = `-- name: LoginUser :one
-SELECT id, username, is_manager
-FROM staffs WHERE username = $1 AND pword = $2
+SELECT id, username, is_manager, pword
+FROM staffs WHERE username = $1
 `
-
-type LoginUserParams struct {
-	Username string
-	Pword    string
-}
 
 type LoginUserRow struct {
 	ID        string
 	Username  string
 	IsManager bool
+	Pword     string
 }
 
-func (q *Queries) LoginUser(ctx context.Context, arg LoginUserParams) (LoginUserRow, error) {
-	row := q.db.QueryRowContext(ctx, loginUser, arg.Username, arg.Pword)
+func (q *Queries) LoginUser(ctx context.Context, username string) (LoginUserRow, error) {
+	row := q.db.QueryRowContext(ctx, loginUser, username)
 	var i LoginUserRow
-	err := row.Scan(&i.ID, &i.Username, &i.IsManager)
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.IsManager,
+		&i.Pword,
+	)
+	return i, err
+}
+
+const tryLogin = `-- name: TryLogin :one
+SELECT id, first_name, last_name, username, pword, is_manager FROM staffs
+WHERE username = $1 and pword = $2
+`
+
+type TryLoginParams struct {
+	Username string
+	Pword    string
+}
+
+func (q *Queries) TryLogin(ctx context.Context, arg TryLoginParams) (Staff, error) {
+	row := q.db.QueryRowContext(ctx, tryLogin, arg.Username, arg.Pword)
+	var i Staff
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Username,
+		&i.Pword,
+		&i.IsManager,
+	)
 	return i, err
 }

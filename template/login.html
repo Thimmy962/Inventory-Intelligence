@@ -189,23 +189,24 @@
 
 
     async function Login() {
-        const username = document.getElementById("username").value
-        const password = document.getElementById("password").value
+        const usernamev = document.getElementById("username").value
+        const passwordv = document.getElementById("password").value
         const data = {
-            username: username, password: password
+            username: usernamev, password: passwordv
         }
         
+        console.log(data)
         try {
             const res = await asyncSubmit("/login", "POST", data)
+            console.log(res)
         } catch (error) {
             console.log(error)
             showToast(error.message,"error")
             // window.location.replace("/");
         }
     }
-        function showToast(message, type = "success") {
+    function showToast(message, type = "success") {
             const container = document.getElementById("toastContainer");
-
             const toast = document.createElement("div");
 
             const baseStyles =

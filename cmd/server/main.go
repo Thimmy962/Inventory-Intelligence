@@ -14,6 +14,7 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -26,14 +27,13 @@ var requiredEnv = []string{
 	"SECRET_STRING",
 }
 
-
 func MustLoadEnv() {
 	var enverror = 0
 	err := godotenv.Load()
 	if err != nil {
-        log.Println(err)
-        os.Exit(1)
-    }
+		log.Println(err)
+		os.Exit(1)
+	}
 	for _, key := range requiredEnv {
 		if os.Getenv(key) == "" {
 			log.Printf("env vars '%v', is missing\n", key)
@@ -47,22 +47,21 @@ func MustLoadEnv() {
 	}
 }
 
-
 func main() {
 	MustLoadEnv()
 	workers := 3
-    var err error // Initial declaration
+	var err error // Initial declaration
 
-    // Use = because err is already declared
-    if len(os.Args) > 1 {
-        sworkers := os.Args[1]
-        // Use = here as well to update the existing variables
-        workers, err = strconv.Atoi(sworkers) 
-        if err != nil {
-            log.Printf("Could not convert '%s' to int", sworkers)
-            os.Exit(1)
-        }
-    }
+	// Use = because err is already declared
+	if len(os.Args) > 1 {
+		sworkers := os.Args[1]
+		// Use = here as well to update the existing variables
+		workers, err = strconv.Atoi(sworkers)
+		if err != nil {
+			log.Printf("Could not convert '%s' to int", sworkers)
+			os.Exit(1)
+		}
+	}
 
 	dbURL := os.Getenv("DB_URL")
 	db, err := sql.Open("postgres", dbURL)
@@ -71,21 +70,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	dbServer := &app.Server {
-		DB: db,
-		Queries: database.New(db),
-		SecretKey: os.Getenv("secret_key"),	
+	dbServer := &app.Server{
+		DB:        db,
+		Queries:   database.New(db),
+		SecretKey: os.Getenv("secret_key"),
 	}
 
 	// serMux := http.NewServeMux()
 	serMux := mux.NewRouter().StrictSlash(true)
-	server := http.Server{Addr: ":"+ port, Handler: serMux}
+	server := http.Server{Addr: ":" + port, Handler: serMux}
 	channel := make(chan string, 100)
 	var wg sync.WaitGroup
 	dbQuery := handler.NewHandler(dbServer, channel, &wg)
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	go dbQuery.StartWorker(ctx, workers)
-	
+
 	serMux.HandleFunc("/bulkcreate", dbServer.CORSMiddleware(dbQuery.BulkCreateProducts)).Methods("POST")
 	serMux.HandleFunc("/newproduct", dbServer.CORSMiddleware(dbQuery.CreateProduct)).Methods("POST")
 	serMux.HandleFunc("/product/{id}", dbServer.CORSMiddleware(dbQuery.GetProduct)).Methods("GET")
@@ -101,19 +100,20 @@ func main() {
 	serMux.HandleFunc("/topselling", dbServer.CORSMiddleware(dbQuery.TopProducts)).Methods("GET")
 	serMux.HandleFunc("/trends/{pid}", dbServer.CORSMiddleware(dbQuery.ProductTrend)).Methods("GET")
 	serMux.HandleFunc("/login", dbServer.HTMLCORSMiddleware(dbQuery.Login)).Methods("GET", "POST")
-	// serMux.HandleFunc("/register", dbSer)
+	serMux.HandleFunc("/register", dbServer.HTMLCORSMiddleware(dbQuery.Register)).Methods("GET", "POST")
 
 	sigs := make(chan os.Signal, 2)
 	signal.Notify(sigs, syscall.SIGINT)
 
-	go func(){
-			sig := <-sigs 
-			log.Println("Received Signal: ", sig)
-			server.Shutdown(ctx)
-			cancel()
+	go func() {
+		sig := <-sigs
+		log.Println("Received Signal: ", sig)
+		log.Println("Shutting Down...")
+		server.Shutdown(ctx)
+		cancel()
 	}()
 
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-    log.Fatal(err)
+		log.Fatal(err)
 	}
 }

@@ -95,7 +95,6 @@
     <aside class="h-screen w-64 fixed left-0 top-0 bg-slate-50 dark:bg-zinc-950 flex flex-col py-8 px-4 z-50">
     <div class="mb-10 px-4">
         <h1 class="text-2xl font-bold text-emerald-900 dark:text-emerald-50 tracking-tight">ShalomGate</h1>
-        <p class="text-xs font-medium text-slate-500 font-plus-jakarta uppercase tracking-widest mt-1">Retail Manager</p>
     </div>
     <nav class="flex-1 space-y-1">
         <!-- Dashboard Active -->
@@ -134,7 +133,7 @@
                 <img alt="User profile" class="w-full h-full object-cover" data-alt="Nigerian merchant portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3TdU9i8VIkfHZyjfUDGgmchjdT-RjDeg80U46AYKXQIUf9ADYzUCC5g_hLW_67JX6Plyczd667BpSa6ZOed1I2EnhAErQKuzB5P0QTmqfHvzIwHD6S6YYosvmjOxNETem2TO9xOGR9aVDnygZt_RsnLZNLdjMezt_Q8mbpoAUq0Dmwu6s3VvBuDCEnr-hG53raK9CR04-9ArGDRY702Dogkc6RTCvH_kR6t1Ozoo69lfUZw4OBBjdeLxhY237PWTS_Pego1XvkQ"/>
             </div>
             <div class="overflow-hidden">
-                <p class="text-sm font-bold truncate">ShalomGate</p>
+                <p id="staffname" class="text-sm font-bold truncate"></p>
                 <p class="text-xs text-slate-500">Ilisan, NG</p>
             </div>
         </div>
@@ -292,7 +291,7 @@
             }
         });
 
-        function showToast(message, type = "success") {
+        function showToast(message, type) {
             const container = document.getElementById("toastContainer");
 
             const toast = document.createElement("div");
@@ -421,6 +420,19 @@
                 });
                 searchoverlay.classList.remove("hidden");
         }
+
+        document.addEventListener("DOMContentLoaded", ()=>{
+            const username = localStorage.getItem("username")
+            const auth = localStorage.getItem("access_token")
+            console.log(username)
+            if(!username || !auth) {
+                localStorage.clear()
+                window.location.href = "/login"
+                return
+            }
+            const pStaff = document.getElementById("staffname")
+            p.innerHTML = username
+       })
    </script>
 </body>
 </html>
