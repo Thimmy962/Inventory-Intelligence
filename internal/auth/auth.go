@@ -3,9 +3,7 @@ package auth
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/alexedwards/argon2id"
@@ -25,30 +23,30 @@ func CreateHash(password string) (string, error) {
 	return argon2id.CreateHash(password, params)
 }
 
-
 func CheckHash(password, hash string) (bool, error) {
 	return argon2id.ComparePasswordAndHash(password, hash)
 }
 
 /**
  * Used to make authentication/access tokens
-*/
+ */
 func MakeTokens(secretKey string, id uuid.UUID, expiresIn time.Duration) (string, error) {
 
 	now := time.Now()
 	regClaims := jwt.RegisteredClaims{
-		Issuer: "ShalomGate", IssuedAt: jwt.NewNumericDate(now), ExpiresAt: jwt.NewNumericDate(now.Add(expiresIn)), Subject: id.String(),
+		Issuer: "ShalomGate",
+		IssuedAt: jwt.NewNumericDate(now),
+		ExpiresAt: jwt.NewNumericDate(now.Add(expiresIn)), Subject: id.String(),
 	}
 
 	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, regClaims)
-	token, err := tok.SignedString(secretKey)
+	token, err := tok.SignedString([]byte(secretKey))
 
 	if err != nil {
 		return "", err
 	}
 	return token, nil
 }
-
 
 func ValidateToken(tokenString, secretKey string) (uuid.UUID, error) {
 	claims := jwt.MapClaims{}
@@ -75,29 +73,9 @@ func ValidateToken(tokenString, secretKey string) (uuid.UUID, error) {
 	return userID, nil
 }
 
-func GetBearerToken(headers http.Header, secret string) (string, error) {
-	// extract the authorization header
-	rawHeader := headers.Get("Authorization")
-	if rawHeader == "" {
-		return "", fmt.Errorf("authorization header is missing")
-	}
-
-	// split on spacec
-	parts := strings.Fields(rawHeader)
-	if len(parts) < 2 {
-		return "", fmt.Errorf("authorization header is malformed (expected: Bearer <token>)")
-	}
-
-	if !strings.EqualFold(parts[0], "Bearer") {
-		return "", fmt.Errorf("authorization type must be Bearer")
-	}
-
-	tokenString := parts[1]
-	if tokenString == "" {
-		return "", fmt.Errorf("bearer token is empty")
-	}
-
-	id, err := ValidateToken(tokenString, secret)
+//The auth token is sent as a cookie to the server, which is extracted by the middleware
+func GetBearerToken(cookie, secret string) (string, error) {
+	id, err := ValidateToken(cookie, secret)
 	if err != nil {
 		return "", fmt.Errorf("%w", err)
 	}

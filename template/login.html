@@ -194,15 +194,26 @@
         const data = {
             username: usernamev, password: passwordv
         }
-        
-        console.log(data)
         try {
             const res = await asyncSubmit("/login", "POST", data)
-            console.log(res)
+            
+            const date = new Date()
+            
+            //set expire time to 5 hours
+            date.setTime(date.getTime() + (5 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = `access_token=${res.AuthToken}; ` 
+                + expires 
+                + "; path=/; SameSite=Lax; Secure"
+
+
+           document.cookie = `admin=${res.Is_Manager};` + "path=/; SameSite=Lax; Secure"
+            
+            localStorage.setItem("username", res.Username)
+            window.location.href = "/"
         } catch (error) {
             console.log(error)
             showToast(error.message,"error")
-            // window.location.replace("/");
         }
     }
     function showToast(message, type = "success") {

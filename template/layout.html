@@ -104,25 +104,25 @@
             <span class="font-plus-jakarta text-sm font-medium">Dashboard</span>
         </a>
         <!-- Inventory -->
-        <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-zinc-500 hover:text-emerald-700 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-colors scale-95 active:duration-150"
+        <a class="admin-only flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-zinc-500 hover:text-emerald-700 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-colors scale-95 active:duration-150"
             href="/index">
             <span class="material-symbols-outlined">inventory_2</span>
             <span class="font-plus-jakarta text-sm font-medium">Inventory</span>
         </a>
         <!-- Reports -->
-        <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-zinc-500 hover:text-emerald-700 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-colors scale-95 active:duration-150" href="#">
+        <a class="admin-only flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-zinc-500 hover:text-emerald-700 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-colors scale-95 active:duration-150" href="#">
             <span class="material-symbols-outlined">analytics</span>
             <span class="font-plus-jakarta text-sm font-medium">Reports</span>
         </a>
-        <!-- Settings -->
-        <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-zinc-500 hover:text-emerald-700 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-colors scale-95 active:duration-150" href="#">
-            <span class="material-symbols-outlined">settings</span>
-            <span class="font-plus-jakarta text-sm font-medium">Settings</span>
+        <!-- Register New User -->
+        <a class="admin-only flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-zinc-500 hover:text-emerald-700 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-colors scale-95 active:duration-150" href="/register">
+            <span class="material-symbols-outlined">person_add</span>
+            <span class="font-plus-jakarta text-sm font-medium">New Staff</span>
         </a>
     </nav>
     
     <div class="mt-auto px-4">
-        <div class="space-y-3">
+        <div class="admin-only space-y-3">
             <button class="w-full py-3 bg-white text-primary rounded-xl font-bold shadow-sm hover:bg-primary/5 border border-primary/20 transition-all flex items-center justify-center gap-2 font-display text-sm uppercase tracking-wide" onclick="document.getElementById('addProductModal').classList.remove('hidden')">
                 <span class="material-symbols-outlined text-[20px]">add_circle</span>
                 <span>Add New Product</span>
@@ -133,7 +133,7 @@
                 <img alt="User profile" class="w-full h-full object-cover" data-alt="Nigerian merchant portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3TdU9i8VIkfHZyjfUDGgmchjdT-RjDeg80U46AYKXQIUf9ADYzUCC5g_hLW_67JX6Plyczd667BpSa6ZOed1I2EnhAErQKuzB5P0QTmqfHvzIwHD6S6YYosvmjOxNETem2TO9xOGR9aVDnygZt_RsnLZNLdjMezt_Q8mbpoAUq0Dmwu6s3VvBuDCEnr-hG53raK9CR04-9ArGDRY702Dogkc6RTCvH_kR6t1Ozoo69lfUZw4OBBjdeLxhY237PWTS_Pego1XvkQ"/>
             </div>
             <div class="overflow-hidden">
-                <p id="staffname" class="text-sm font-bold truncate"></p>
+                <p id="staffname" class="text-primary text-sm font-bold truncate"></p>
                 <p class="text-xs text-slate-500">Ilisan, NG</p>
             </div>
         </div>
@@ -145,7 +145,7 @@
         <header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md flex justify-between items-center h-16 px-8 border-b border-emerald-100/20 dark:border-zinc-800 shadow-sm dark:shadow-none">
             <h2 class="text-xl font-black text-emerald-800 dark:text-emerald-200 font-plus-jakarta">ShalomGate</h2>
             <div class="flex items-center gap-6">
-                <div class="relative focus-within:ring-2 focus-within:ring-emerald-500 rounded-lg bg-surface-container-low px-4 py-1.5 flex items-center gap-2 transition-all">
+                <div class="admin-only relative focus-within:ring-2 focus-within:ring-emerald-500 rounded-lg bg-surface-container-low px-4 py-1.5 flex items-center gap-2 transition-all">
                     <span class="material-symbols-outlined text-emerald-700 text-lg">search</span>
                     <input id="searchProduct" class="bg-transparent border-none focus:ring-0 text-sm w-64 placeholder:text-slate-400" 
                         placeholder="Search inventory..." type="text" oninput="queryProductOnLayout(this.value)"/>
@@ -155,11 +155,11 @@
                 </div>
                 
                 <div class="flex items-center gap-4 text-emerald-700 dark:text-emerald-400">
-                    <button class="hover:opacity-80 transition-opacity">
+                    <button class="admin-only hover:opacity-80 transition-opacity">
                         <span class="material-symbols-outlined">notifications</span>
                     </button>
-                    <button class="hover:opacity-80 transition-opacity">
-                        <span class="material-symbols-outlined">account_circle</span>
+                    <button id="logoutBtn" class="hover:opacity-80 transition-opacity">
+                        <span id="logout" class="material-symbols-outlined"></span>
                     </button>
                 </div>
             </div>
@@ -244,10 +244,13 @@
                     }
                 }
             });
+
         async function asyncSubmit(url, met, data = null) {
             const res = await fetch(url, {
                 method: met,
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json" },
+                    "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
                 body: JSON.stringify(data)
             });
             const result = await res.json()
@@ -260,7 +263,7 @@
         async function asyncGet(url) {
             const res = await fetch(url, {
                 method: "GET",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json",  "Authorization": `Bearer ${localStorage.getItem("access_token")}` },
             });
             const result = await res.json()
             if (!res.ok) {
@@ -413,7 +416,6 @@
 
                 el.addEventListener("click", () => {
                     input.value = ""
-                    console.log(item.ProductName)
                     clearSearchOverlay();
                 });
                     searchoverlay.appendChild(el);
@@ -421,18 +423,39 @@
                 searchoverlay.classList.remove("hidden");
         }
 
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
         document.addEventListener("DOMContentLoaded", ()=>{
+            const isAdmin = getCookie("admin") === "true";
+
+            if(!isAdmin) {
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+            }
             const username = localStorage.getItem("username")
             const auth = localStorage.getItem("access_token")
-            console.log(username)
-            if(!username || !auth) {
+            if(!username) {
                 localStorage.clear()
                 window.location.href = "/login"
                 return
             }
             const pStaff = document.getElementById("staffname")
-            p.innerHTML = username
+            const logOut = document.getElementById("logout")
+            logOut
+            pStaff.innerHTML = username
+            logOut.innerHTML = "Logout"
        })
-   </script>
+
+        document.getElementById("logoutBtn").addEventListener("click", ()=>{
+            localStorage.clear()
+            document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookies = `admin=;` + "path=/; SameSite=Lax; Secure"
+            window.location.href = "/login"
+
+        })
+</script>
 </body>
 </html>

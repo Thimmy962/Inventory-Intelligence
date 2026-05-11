@@ -95,7 +95,6 @@ func (db *Handler) Login(wr http.ResponseWriter, req *http.Request) {
 			ProcessingError(wr, http.StatusNotFound, err)
 			return
 		}
-
 		// check hashed password for that username and password coming from frontend
 		// converts password to hash and compares to the hashed passed to it
 		// return error or bool
@@ -112,6 +111,8 @@ func (db *Handler) Login(wr http.ResponseWriter, req *http.Request) {
 
 		// convert id in string to uuid
 		id := uuid.MustParse(data.ID)
+
+		// get authentication tokens
 		auth_token, err := auth.MakeTokens(db.server.SecretKey, id, 5 * time.Hour)
 		if err != nil {
 			ProcessingError(wr, http.StatusInternalServerError, err)

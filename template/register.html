@@ -127,6 +127,7 @@
              try {
                  const response = await asyncSubmit('/register', "POST", payload)
                  showToast("Registration Successful")
+                 window.location.href = '/'
              } catch (error) {
                  console.error(error);
                  showToast(error, "error");
