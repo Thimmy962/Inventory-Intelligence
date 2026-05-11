@@ -54,15 +54,11 @@ type Purchase struct {
 	PurchaseDate  time.Time
 }
 
-type Refreshtoken struct {
-	Userid       string
-	Refreshtoken string
-}
-
 type Sale struct {
 	ID          int32
 	TotalAmount float64
 	SaleDate    time.Time
+	StaffID     string
 }
 
 type SalesItem struct {
@@ -77,6 +73,7 @@ type Staff struct {
 	ID        string
 	FirstName string
 	LastName  string
+	Dob       time.Time
 	Username  string
 	Pword     string
 	IsManager bool

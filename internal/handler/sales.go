@@ -48,9 +48,10 @@ func (db *Handler) CreateSales(wr http.ResponseWriter, req *http.Request) {
 		ProcessingError(wr, http.StatusBadRequest, err)
 		return
 	}
-
+	
+	ctx := req.Context()
 	// creates the sales that contains all the sold items; returns an error(if available) and the id of the newly created sales
-	sales_id, err := db.server.Queries.CreateSales(req.Context(), total)
+	sales_id, err := db.server.Queries.CreateSales(ctx, database.CreateSalesParams{TotalAmount: total, StaffID: ctx.Value("id").(string)})
 	if err != nil {
 		ProcessingError(wr, http.StatusBadRequest, err)
 		return

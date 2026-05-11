@@ -12,7 +12,8 @@ import (
 	"main/internal/database"
 	"net/http"
 	"time"
-
+	"golang.org/x/text/cases"
+    	"golang.org/x/text/language"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
@@ -52,7 +53,13 @@ func (db *Handler) Register(wr http.ResponseWriter, req *http.Request) {
 			ProcessingError(wr, http.StatusBadRequest, err)
 			return
 		}
-
+		
+		caser := cases.Title(language.English)
+		
+		staff.Fname = caser.String(staff.Fname)
+		staff.Lname = caser.String(staff.Lname)
+		staff.Username = caser.String(staff.Username)
+		
 		staff.Password, err = auth.CreateHash(staff.Password)
 		if err != nil {
 			ProcessingError(wr, http.StatusBadRequest, err)
@@ -85,7 +92,10 @@ func (db *Handler) Login(wr http.ResponseWriter, req *http.Request) {
 			log.Println(err)
 			ProcessingError(wr, http.StatusBadRequest, err)
 			return
-		}
+		}		
+		caser := cases.Title(language.English)
+		
+		loginDetail.Username = caser.String(loginDetail.Username)
 		// get username details
 		data, err := db.server.Queries.LoginUser(req.Context(), loginDetail.Username)
 		if err != nil {

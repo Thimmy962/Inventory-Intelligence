@@ -69,7 +69,7 @@ func (q *Queries) LoginUser(ctx context.Context, username string) (LoginUserRow,
 }
 
 const tryLogin = `-- name: TryLogin :one
-SELECT id, first_name, last_name, username, pword, is_manager FROM staffs
+SELECT id, first_name, last_name, dob, username, pword, is_manager FROM staffs
 WHERE username = $1 and pword = $2
 `
 
@@ -85,6 +85,7 @@ func (q *Queries) TryLogin(ctx context.Context, arg TryLoginParams) (Staff, erro
 		&i.ID,
 		&i.FirstName,
 		&i.LastName,
+		&i.Dob,
 		&i.Username,
 		&i.Pword,
 		&i.IsManager,

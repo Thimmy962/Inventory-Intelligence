@@ -1,6 +1,6 @@
 -- name: CreateSales :one
-INSERT INTO sales (total_amount, sale_date)
-VALUES ($1, NOW()) RETURNING id;
+INSERT INTO sales (total_amount, sale_date, staff_id)
+VALUES ($1, NOW(), $2) RETURNING id;
 
 -- name: CreateSalesItems :one
 INSERT INTO sales_items (sales_id, product_id, quantity_sold, price_at_sale)

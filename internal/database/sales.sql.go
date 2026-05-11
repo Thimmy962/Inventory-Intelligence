@@ -29,12 +29,17 @@ func (q *Queries) CreateAdjustment(ctx context.Context, arg CreateAdjustmentPara
 }
 
 const createSales = `-- name: CreateSales :one
-INSERT INTO sales (total_amount, sale_date)
-VALUES ($1, NOW()) RETURNING id
+INSERT INTO sales (total_amount, sale_date, staff_id)
+VALUES ($1, NOW(), $2) RETURNING id
 `
 
-func (q *Queries) CreateSales(ctx context.Context, totalAmount float64) (int32, error) {
-	row := q.db.QueryRowContext(ctx, createSales, totalAmount)
+type CreateSalesParams struct {
+	TotalAmount float64
+	StaffID     string
+}
+
+func (q *Queries) CreateSales(ctx context.Context, arg CreateSalesParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, createSales, arg.TotalAmount, arg.StaffID)
 	var id int32
 	err := row.Scan(&id)
 	return id, err
