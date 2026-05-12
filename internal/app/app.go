@@ -76,6 +76,7 @@ func (s *Server) renderError(wr http.ResponseWriter, statusCode int) {
 		Message string
 	} {StatusCode: statusCode, Message: "Unauthorized"}
 	wr.WriteHeader(statusCode)
+
 	tmpl.ExecuteTemplate(wr, "layout.html", errMsg)
 }
 
