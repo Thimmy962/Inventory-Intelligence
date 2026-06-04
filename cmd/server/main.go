@@ -91,7 +91,7 @@ func main() {
 	serMux.HandleFunc("/products", dbServer.CORSMiddleware(dbQuery.GetProducts)).Methods("GET")
 	serMux.HandleFunc("/bulkpurchase", dbServer.CORSMiddleware(dbQuery.NewBulkPurchase)).Methods("POST")
 	serMux.HandleFunc("/purchase", dbServer.CORSMiddleware(dbQuery.NewPurchase)).Methods("POST")
-	serMux.HandleFunc("/sales", dbServer.CORSMiddleware(dbQuery.CreateSales)).Methods("POST")
+	serMux.HandleFunc("/sales", dbServer.CheckOutCORSMiddleware(dbQuery.CreateSales)).Methods("POST")
 	serMux.HandleFunc("/index", dbServer.HTMLCORSMiddleware(dbQuery.Index)).Methods("GET")
 	serMux.HandleFunc("/", dbServer.CheckOutCORSMiddleware(dbQuery.Checkout)).Methods("GET")
 	serMux.HandleFunc("/search", dbServer.CORSMiddleware(dbQuery.Search)).Methods("GET")

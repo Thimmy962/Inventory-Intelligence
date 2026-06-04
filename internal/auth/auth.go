@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"runtime"
 	"time"
-
 	"github.com/alexedwards/argon2id"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -76,6 +75,7 @@ func ValidateToken(tokenString, secretKey string) (uuid.UUID, error) {
 //The auth token is sent as a cookie to the server, which is extracted by the middleware
 func GetBearerToken(cookie, secret string) (string, error) {
 	id, err := ValidateToken(cookie, secret)
+
 	if err != nil {
 		return "", fmt.Errorf("%w", err)
 	}

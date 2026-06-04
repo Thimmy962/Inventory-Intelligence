@@ -37,9 +37,10 @@ func (db *Handler) CreateSales(wr http.ResponseWriter, req *http.Request) {
 		ProcessingError(wr, http.StatusBadRequest, err)
 		return
 	}
+	
 
 	/*
-		Sort all the sales item into a list of format recognized by the system
+		Sort all the sales item into a list of format recognizable by the system
 		if theres an error return
 		all get the sum total of the products as sales
 	*/
@@ -49,6 +50,7 @@ func (db *Handler) CreateSales(wr http.ResponseWriter, req *http.Request) {
 		return
 	}
 	
+
 	ctx := req.Context()
 	// creates the sales that contains all the sold items; returns an error(if available) and the id of the newly created sales
 	sales_id, err := db.server.Queries.CreateSales(ctx, database.CreateSalesParams{TotalAmount: total, StaffID: ctx.Value("id").(string)})
@@ -57,6 +59,7 @@ func (db *Handler) CreateSales(wr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	log.Println("Hello")
 	for index, product := range products {
 		_, err := db.server.Queries.CreateSalesItems(req.Context(), database.CreateSalesItemsParams{
 			SalesID: sales_id, ProductID: product.ID, PriceAtSale: product.Price, QuantitySold: items[index].Quantity_sold,

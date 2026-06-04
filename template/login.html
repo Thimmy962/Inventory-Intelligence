@@ -196,7 +196,6 @@
         }
         try {
             const res = await asyncSubmit("/login", "POST", data)
-            
             const date = new Date()
             
             //set expire time to 5 hours
@@ -216,6 +215,7 @@
             showToast(error.message,"error")
         }
     }
+
     function showToast(message, type = "success") {
             const container = document.getElementById("toastContainer");
             const toast = document.createElement("div");
